@@ -97,8 +97,8 @@ export default function History() {
         <div className="flex flex-col gap-3">
           {[...items].reverse().map((item) => {
             const isExpanded = expandedId === item.id;
-            const profitPct = item.acquisitionCost !== 0
-              ? (item.profit / item.acquisitionCost) * 100
+            const profitPct = item.totalCost !== 0
+              ? (item.profit / item.totalCost) * 100
               : 0;
             const positive = item.profit >= 0;
 
@@ -126,7 +126,9 @@ export default function History() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground text-base leading-tight truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Cost {aed(item.acquisitionCost)} → Sale {aed(item.salePrice)}
+                      {item.renovationCost > 0
+                        ? `Cost ${aed(item.totalCost)} (incl. reno) → Sale ${aed(item.salePrice)}`
+                        : `Cost ${aed(item.acquisitionCost)} → Sale ${aed(item.salePrice)}`}
                     </p>
                     {item.notes && (
                       <p className="text-xs text-muted-foreground/70 mt-0.5 truncate italic">{item.notes}</p>
@@ -173,20 +175,37 @@ export default function History() {
                       </div>
                     </div>
 
-                    {/* Cost breakdown bar */}
-                    <div className="mt-3">
-                      <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-                        <span>Acquisition: {aed(item.acquisitionCost)}</span>
-                        <span>Sale: {aed(item.salePrice)}</span>
+                    {/* Cost breakdown */}
+                    <div className="mt-3 flex flex-col gap-1.5 text-xs text-muted-foreground">
+                      <div className="flex justify-between">
+                        <span>Acquisition</span>
+                        <span className="font-medium text-foreground">{aed(item.acquisitionCost)}</span>
                       </div>
+                      {item.renovationCost > 0 && (
+                        <div className="flex justify-between">
+                          <span>Renovation</span>
+                          <span className="font-medium text-foreground">{aed(item.renovationCost)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between border-t border-border pt-1.5">
+                        <span className="font-semibold text-foreground">Total Cost</span>
+                        <span className="font-semibold text-foreground">{aed(item.totalCost)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Sale Price</span>
+                        <span className="font-medium text-foreground">{aed(item.salePrice)}</span>
+                      </div>
+                    </div>
+                    {/* Bar */}
+                    <div className="mt-2">
                       <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                         <div
                           className={`h-full rounded-full ${positive ? "bg-primary" : "bg-destructive"}`}
-                          style={{ width: `${Math.min(100, (item.acquisitionCost / item.salePrice) * 100)}%` }}
+                          style={{ width: `${Math.min(100, (item.totalCost / item.salePrice) * 100)}%` }}
                         />
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-1 text-center">
-                        Cost is {fmt((item.acquisitionCost / item.salePrice) * 100)}% of sale price
+                        Total cost is {fmt((item.totalCost / item.salePrice) * 100)}% of sale price
                       </p>
                     </div>
 

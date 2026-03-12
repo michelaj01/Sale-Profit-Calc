@@ -13,6 +13,8 @@ export interface Item {
   id: number;
   name: string;
   acquisitionCost: number;
+  renovationCost: number;
+  totalCost: number;
   salePrice: number;
   profit: number;
   profitMargin: number;
@@ -24,6 +26,7 @@ export interface Item {
 export interface CreateItemRequest {
   name: string;
   acquisitionCost: number;
+  renovationCost?: number;
   salePrice: number;
   notes?: string | null;
 }

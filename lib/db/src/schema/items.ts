@@ -6,6 +6,7 @@ export const itemsTable = pgTable("items", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   acquisitionCost: numeric("acquisition_cost", { precision: 12, scale: 2 }).notNull(),
+  renovationCost: numeric("renovation_cost", { precision: 12, scale: 2 }).default("0").notNull(),
   salePrice: numeric("sale_price", { precision: 12, scale: 2 }).notNull(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

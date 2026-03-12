@@ -2,7 +2,6 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { itemsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 import {
   CreateItemBody,
   UpdateItemBody,
@@ -12,21 +11,25 @@ import {
 
 const router: IRouter = Router();
 
-function computeMetrics(acquisitionCost: number, salePrice: number) {
-  const profit = salePrice - acquisitionCost;
+function computeMetrics(acquisitionCost: number, renovationCost: number, salePrice: number) {
+  const totalCost = acquisitionCost + renovationCost;
+  const profit = salePrice - totalCost;
   const profitMargin = salePrice !== 0 ? (profit / salePrice) * 100 : 0;
-  const roi = acquisitionCost !== 0 ? (profit / acquisitionCost) * 100 : 0;
-  return { profit, profitMargin, roi };
+  const roi = totalCost !== 0 ? (profit / totalCost) * 100 : 0;
+  return { totalCost, profit, profitMargin, roi };
 }
 
 function mapItem(row: typeof itemsTable.$inferSelect) {
   const acquisitionCost = parseFloat(row.acquisitionCost as string);
+  const renovationCost = parseFloat(row.renovationCost as string) || 0;
   const salePrice = parseFloat(row.salePrice as string);
-  const { profit, profitMargin, roi } = computeMetrics(acquisitionCost, salePrice);
+  const { totalCost, profit, profitMargin, roi } = computeMetrics(acquisitionCost, renovationCost, salePrice);
   return {
     id: row.id,
     name: row.name,
     acquisitionCost,
+    renovationCost,
+    totalCost,
     salePrice,
     profit,
     profitMargin,
@@ -47,12 +50,13 @@ router.post("/items", async (req, res) => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { name, acquisitionCost, salePrice, notes } = parsed.data;
+  const { name, acquisitionCost, renovationCost, salePrice, notes } = parsed.data;
   const [row] = await db
     .insert(itemsTable)
     .values({
       name,
       acquisitionCost: acquisitionCost.toString(),
+      renovationCost: (renovationCost ?? 0).toString(),
       salePrice: salePrice.toString(),
       notes: notes ?? null,
     })
@@ -71,12 +75,13 @@ router.put("/items/:id", async (req, res) => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { name, acquisitionCost, salePrice, notes } = parsed.data;
+  const { name, acquisitionCost, renovationCost, salePrice, notes } = parsed.data;
   const [row] = await db
     .update(itemsTable)
     .set({
       name,
       acquisitionCost: acquisitionCost.toString(),
+      renovationCost: (renovationCost ?? 0).toString(),
       salePrice: salePrice.toString(),
       notes: notes ?? null,
     })

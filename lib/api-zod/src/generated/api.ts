@@ -23,6 +23,8 @@ export const ListItemsResponseItem = zod.object({
   id: zod.number(),
   name: zod.string(),
   acquisitionCost: zod.number(),
+  renovationCost: zod.number(),
+  totalCost: zod.number(),
   salePrice: zod.number(),
   profit: zod.number(),
   profitMargin: zod.number(),
@@ -38,6 +40,7 @@ export const ListItemsResponse = zod.array(ListItemsResponseItem);
 export const CreateItemBody = zod.object({
   name: zod.string(),
   acquisitionCost: zod.number(),
+  renovationCost: zod.number().optional(),
   salePrice: zod.number(),
   notes: zod.string().nullish(),
 });
@@ -52,6 +55,7 @@ export const UpdateItemParams = zod.object({
 export const UpdateItemBody = zod.object({
   name: zod.string(),
   acquisitionCost: zod.number(),
+  renovationCost: zod.number().optional(),
   salePrice: zod.number(),
   notes: zod.string().nullish(),
 });
@@ -60,6 +64,8 @@ export const UpdateItemResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
   acquisitionCost: zod.number(),
+  renovationCost: zod.number(),
+  totalCost: zod.number(),
   salePrice: zod.number(),
   profit: zod.number(),
   profitMargin: zod.number(),

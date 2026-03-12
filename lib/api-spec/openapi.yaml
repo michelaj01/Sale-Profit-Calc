@@ -134,6 +134,10 @@ components:
           type: string
         acquisitionCost:
           type: number
+        renovationCost:
+          type: number
+        totalCost:
+          type: number
         salePrice:
           type: number
         profit:
@@ -152,6 +156,8 @@ components:
         - id
         - name
         - acquisitionCost
+        - renovationCost
+        - totalCost
         - salePrice
         - profit
         - profitMargin
@@ -163,6 +169,8 @@ components:
         name:
           type: string
         acquisitionCost:
+          type: number
+        renovationCost:
           type: number
         salePrice:
           type: number

@@ -10,6 +10,8 @@ export interface Item {
   id: number;
   name: string;
   acquisitionCost: number;
+  renovationCost: number;
+  totalCost: number;
   salePrice: number;
   profit: number;
   profitMargin: number;

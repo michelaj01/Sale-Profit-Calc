@@ -9,6 +9,7 @@
 export interface CreateItemRequest {
   name: string;
   acquisitionCost: number;
+  renovationCost?: number;
   salePrice: number;
   notes?: string | null;
 }
