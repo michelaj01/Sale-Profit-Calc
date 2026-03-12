@@ -246,6 +246,12 @@ export default function Calculator() {
   const [nocFee, setNocFee]               = useState(DEFAULTS.nocFee);
   const [serviceFee, setServiceFee]       = useState(DEFAULTS.serviceFee);
 
+  // Advanced pricing (optional)
+  const [showAdvanced,   setShowAdvanced]   = useState(false);
+  const [mouPrice,       setMouPrice]       = useState("");   // MOU/contract price → DLD fee basis
+  const [bankValuation,  setBankValuation]  = useState("");   // Bank valuation → mortgage reg basis
+  const [gapPayment,     setGapPayment]     = useState("");   // Cash gap paid to seller
+
   // Override states for auto-computed fees (null = use formula)
   const [agencyFeeOvr,   setAgencyFeeOvr]   = useState<string | null>(null);
   const [dldFeeOvr,      setDldFeeOvr]      = useState<string | null>(null);
@@ -267,12 +273,17 @@ export default function Calculator() {
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // ── derived acquisition ────────────────────────────────────────────────
-  const propPrice       = n(propertyPrice);
+  const propPrice      = n(propertyPrice);
+  const mouPriceN      = showAdvanced && mouPrice      ? n(mouPrice)      : propPrice;
+  const bankValN       = showAdvanced && bankValuation ? n(bankValuation) : propPrice;
+  const gapPaymentN    = showAdvanced ? n(gapPayment) : 0;
+
+  // Fee basis: agency on actual price, DLD on MOU, mortgage reg on bank val
   const agencyFeeCalc   = propPrice * AGENCY_FEE_PCT * (1 + AGENCY_VAT_PCT);
-  const dldFeeCalc      = propPrice * DLD_FEE_PCT;
+  const dldFeeCalc      = mouPriceN * DLD_FEE_PCT;
   const trusteeFeeCalc  = propPrice > 0 ? TRUSTEE_FEE_FLAT : 0;
   const downFrac        = Math.min(100, Math.max(0, parseFloat(downPct) || 20)) / 100;
-  const loanAmount      = propPrice * (1 - downFrac);
+  const loanAmount      = bankValN * (1 - downFrac);
   const mortgageRegCalc = loanAmount * MORTGAGE_REG_PCT;
 
   // Use override if manually edited, otherwise use formula
@@ -282,7 +293,7 @@ export default function Calculator() {
   const mortgageReg = mortgageRegOvr !== null ? n(mortgageRegOvr) : mortgageRegCalc;
 
   const manualAcq   = n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee);
-  const acqTotal    = propPrice + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
+  const acqTotal    = propPrice + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
 
   // ── derived reno & totals ──────────────────────────────────────────────
   const renoTotal  = renoItems.reduce((s, i) => s + n(i.amount), 0);
@@ -348,6 +359,7 @@ export default function Calculator() {
     });
     toast({ title: "Property saved!" });
     setName(""); setPropertyPrice(""); setBankProcFee(""); setValuationFee(""); setNocFee(""); setServiceFee("");
+    setMouPrice(""); setBankValuation(""); setGapPayment(""); setShowAdvanced(false);
     setRenoItems([newCostItem()]); setSalePrice("");
   }
 
@@ -380,17 +392,58 @@ export default function Calculator() {
 
           {/* Property price input */}
           <div className="flex items-center gap-2">
-            <span className="w-32 shrink-0 text-sm font-medium text-foreground whitespace-nowrap">Property Price</span>
+            <span className="w-32 shrink-0 text-sm font-medium text-foreground whitespace-nowrap">Actual Price</span>
             <AEDInput value={propertyPrice} onChange={setPropertyPrice} className="flex-1 min-w-0" />
           </div>
+
+          {/* Advanced pricing toggle */}
+          <button type="button"
+            onClick={() => setShowAdvanced(v => !v)}
+            className="flex items-center gap-1.5 text-xs font-semibold text-primary active:opacity-70 transition self-start">
+            <svg className={`w-3.5 h-3.5 transition-transform ${showAdvanced ? "rotate-90" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+            {showAdvanced ? "Hide advanced pricing" : "Different MOU / bank valuation?"}
+          </button>
+
+          {/* Advanced pricing fields */}
+          {showAdvanced && (
+            <div className="flex flex-col gap-2 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-3">
+              <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide">Advanced Pricing</p>
+
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-32 shrink-0 text-sm text-foreground">MOU Price</span>
+                  <AEDInput value={mouPrice} onChange={setMouPrice} placeholder="e.g. 4,990,000" className="flex-1 min-w-0" />
+                </div>
+                <p className="text-[11px] text-muted-foreground pl-34 ml-[8.5rem]">DLD fee (4%) is billed on this</p>
+              </div>
+
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-32 shrink-0 text-sm text-foreground">Bank Valuation</span>
+                  <AEDInput value={bankValuation} onChange={setBankValuation} placeholder="e.g. 4,950,000" className="flex-1 min-w-0" />
+                </div>
+                <p className="text-[11px] text-muted-foreground ml-[8.5rem]">Mortgage reg (0.25%) uses this</p>
+              </div>
+
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-32 shrink-0 text-sm text-foreground">Gap Payment</span>
+                  <AEDInput value={gapPayment} onChange={setGapPayment} placeholder="Cash to seller" className="flex-1 min-w-0" />
+                </div>
+                <p className="text-[11px] text-muted-foreground ml-[8.5rem]">Extra cash paid above MOU (added to cost)</p>
+              </div>
+            </div>
+          )}
 
           {/* Auto-computed fees */}
           <div className="flex flex-col gap-2 bg-muted/40 rounded-lg px-3 py-2.5">
             {([
-              { key: "agencyFee",   label: "Agency Fee",    sub: "2% + 5% VAT",   val: agencyFee,   ovr: agencyFeeOvr,   setOvr: setAgencyFeeOvr },
-              { key: "dldFee",      label: "DLD Fee",       sub: "4%",             val: dldFee,      ovr: dldFeeOvr,      setOvr: setDldFeeOvr },
-              { key: "trusteeFee",  label: "Trustee Fee",   sub: "flat",           val: trusteeFee,  ovr: trusteeFeeOvr,  setOvr: setTrusteeFeeOvr },
-              { key: "mortgageReg", label: "Mortgage Reg.", sub: "0.25% of loan",  val: mortgageReg, ovr: mortgageRegOvr, setOvr: setMortgageRegOvr },
+              { key: "agencyFee",   label: "Agency Fee",    sub: showAdvanced ? "2% + 5% VAT (actual)" : "2% + 5% VAT",       val: agencyFee,   ovr: agencyFeeOvr,   setOvr: setAgencyFeeOvr },
+              { key: "dldFee",      label: "DLD Fee",       sub: showAdvanced && mouPrice ? "4% of MOU price" : "4%",           val: dldFee,      ovr: dldFeeOvr,      setOvr: setDldFeeOvr },
+              { key: "trusteeFee",  label: "Trustee Fee",   sub: "flat",                                                        val: trusteeFee,  ovr: trusteeFeeOvr,  setOvr: setTrusteeFeeOvr },
+              { key: "mortgageReg", label: "Mortgage Reg.", sub: showAdvanced && bankValuation ? "0.25% of bank val. loan" : "0.25% of loan", val: mortgageReg, ovr: mortgageRegOvr, setOvr: setMortgageRegOvr },
             ] as const).map(({ key, label, sub, val, ovr, setOvr }) => (
               <EditableAutoRow
                 key={key}
