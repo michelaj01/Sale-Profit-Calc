@@ -191,7 +191,7 @@ export default function Calculator() {
         disabled={createItem.isPending || !name.trim() || !acq || !sale}
         className="w-full rounded-xl bg-primary text-primary-foreground font-semibold py-4 text-base shadow-sm active:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition"
       >
-        {createItem.isPending ? "Saving..." : "Save to History"}
+        {createItem.isPending ? "Saving..." : "Save Item"}
       </button>
     </div>
   );
