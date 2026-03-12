@@ -3,7 +3,12 @@ import { useCreateItem } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
 function fmt(val: number) {
-  return val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return val.toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function currency(val: number, showSign = false) {
+  const sign = showSign && val > 0 ? "+" : showSign && val < 0 ? "−" : "";
+  return `${sign}AED ${fmt(Math.abs(val))}`;
 }
 
 const TIERS = [
@@ -78,14 +83,14 @@ export default function Calculator() {
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-foreground">Acquisition Cost</label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-base font-medium">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-semibold">AED</span>
             <input
               type="number"
               inputMode="decimal"
               value={acqCost}
               onChange={e => setAcqCost(e.target.value)}
               placeholder="0.00"
-              className="w-full rounded-lg border border-input bg-background pl-8 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+              className="w-full rounded-lg border border-input bg-background pl-14 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
             />
           </div>
           <p className="text-xs text-muted-foreground">What you paid for it</p>
@@ -94,14 +99,14 @@ export default function Calculator() {
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-foreground">Sale Price</label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-base font-medium">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-semibold">AED</span>
             <input
               type="number"
               inputMode="decimal"
               value={salePrice}
               onChange={e => setSalePrice(e.target.value)}
               placeholder="0.00"
-              className="w-full rounded-lg border border-input bg-background pl-8 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+              className="w-full rounded-lg border border-input bg-background pl-14 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
             />
           </div>
           <p className="text-xs text-muted-foreground">What you want to sell it for</p>
@@ -125,8 +130,8 @@ export default function Calculator() {
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Results</p>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col items-center gap-1 py-1">
-              <span className={`text-2xl font-bold ${isProfitable ? "text-primary" : "text-destructive"}`}>
-                {isProfitable ? "+$" : "-$"}{fmt(Math.abs(profit))}
+              <span className={`text-xl font-bold ${isProfitable ? "text-primary" : "text-destructive"}`}>
+                {currency(profit, true)}
               </span>
               <span className="text-xs text-muted-foreground">Profit</span>
             </div>
@@ -172,9 +177,9 @@ export default function Calculator() {
                     <span className="text-xs text-muted-foreground">{tier.desc}</span>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-base font-bold text-foreground">${fmt(price)}</span>
+                    <span className="text-base font-bold text-foreground">AED {fmt(price)}</span>
                     {tier.margin > 0 && (
-                      <span className={`text-xs font-medium ${tier.color}`}>+${fmt(tierProfit)}</span>
+                      <span className={`text-xs font-medium ${tier.color}`}>+AED {fmt(tierProfit)}</span>
                     )}
                   </div>
                 </button>

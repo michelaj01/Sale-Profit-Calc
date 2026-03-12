@@ -3,7 +3,11 @@ import { useListItems, useDeleteItem } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
 function fmt(val: number) {
-  return val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return val.toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function aed(val: number) {
+  return `AED ${fmt(Math.abs(val))}`;
 }
 
 function ProfitBadge({ value, label }: { value: number; label: string }) {
@@ -65,8 +69,8 @@ export default function History() {
             <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">Items</p>
           </div>
           <div className="bg-card border border-card-border rounded-xl p-3 text-center shadow-sm">
-            <p className={`text-xl font-bold ${totalProfit >= 0 ? "text-primary" : "text-destructive"}`}>
-              ${fmt(totalProfit)}
+            <p className={`text-base font-bold ${totalProfit >= 0 ? "text-primary" : "text-destructive"}`}>
+              {aed(totalProfit)}
             </p>
             <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">Total Profit</p>
           </div>
@@ -111,7 +115,7 @@ export default function History() {
                   {/* Profit pill */}
                   <div className={`shrink-0 rounded-xl px-3 py-2 text-center min-w-[70px] ${positive ? "bg-primary/10" : "bg-destructive/10"}`}>
                     <p className={`text-base font-bold leading-tight ${positive ? "text-primary" : "text-destructive"}`}>
-                      {positive ? "+" : "−"}${fmt(Math.abs(item.profit))}
+                      {positive ? "+" : "−"}{aed(item.profit)}
                     </p>
                     <p className={`text-[10px] font-semibold mt-0.5 ${positive ? "text-primary/70" : "text-destructive/70"}`}>
                       {fmt(profitPct)}%
@@ -122,7 +126,7 @@ export default function History() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground text-base leading-tight truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Cost ${fmt(item.acquisitionCost)} → Sale ${fmt(item.salePrice)}
+                      Cost {aed(item.acquisitionCost)} → Sale {aed(item.salePrice)}
                     </p>
                     {item.notes && (
                       <p className="text-xs text-muted-foreground/70 mt-0.5 truncate italic">{item.notes}</p>
@@ -144,8 +148,8 @@ export default function History() {
                     {/* Metrics 2x2 grid */}
                     <div className="grid grid-cols-2 gap-2 mt-3">
                       <div className={`rounded-xl p-3 text-center ${positive ? "bg-primary/8" : "bg-destructive/8"}`}>
-                        <p className={`text-xl font-bold ${positive ? "text-primary" : "text-destructive"}`}>
-                          {positive ? "+" : "−"}${fmt(Math.abs(item.profit))}
+                        <p className={`text-base font-bold ${positive ? "text-primary" : "text-destructive"}`}>
+                          {positive ? "+" : "−"}{aed(item.profit)}
                         </p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">Profit</p>
                       </div>
@@ -172,8 +176,8 @@ export default function History() {
                     {/* Cost breakdown bar */}
                     <div className="mt-3">
                       <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-                        <span>Acquisition: ${fmt(item.acquisitionCost)}</span>
-                        <span>Sale: ${fmt(item.salePrice)}</span>
+                        <span>Acquisition: {aed(item.acquisitionCost)}</span>
+                        <span>Sale: {aed(item.salePrice)}</span>
                       </div>
                       <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                         <div
