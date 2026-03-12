@@ -396,20 +396,57 @@ export default function Calculator() {
 
       {/* ── Results ── */}
       {hasBoth && (
-        <div className={`rounded-xl border p-4 shadow-sm ${profitable ? "bg-card border-card-border" : "bg-destructive/5 border-destructive/30"}`}>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Results</p>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { val: aedSigned(profit),        label: "Profit" },
-              { val: (profitable ? "+" : "") + pct(profitPct), label: "Profit %" },
-              { val: pct(margin),              label: "Margin" },
-              { val: pct(roi),                 label: "ROI" },
-            ].map(({ val, label }) => (
-              <div key={label} className="flex flex-col items-center gap-1 py-1">
-                <span className={`text-xl font-bold tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>{val}</span>
-                <span className="text-xs text-muted-foreground">{label}</span>
+        <div className={`rounded-xl border p-4 shadow-sm flex flex-col gap-4 ${profitable ? "bg-card border-card-border" : "bg-destructive/5 border-destructive/30"}`}>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Results</p>
+
+          {/* Profit headline */}
+          <div className="flex items-baseline justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Your Profit</p>
+              <p className={`text-3xl font-bold tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
+                {aedSigned(profit)}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground mb-0.5">Sale Price</p>
+              <p className="text-sm font-semibold text-foreground tabular-nums">{aed(sale)}</p>
+            </div>
+          </div>
+
+          <div className="h-px bg-border" />
+
+          {/* Return on total investment */}
+          <div className={`rounded-xl p-3.5 ${profitable ? "bg-primary/8" : "bg-destructive/8"}`}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1">
+                <p className="text-sm font-bold text-foreground">Total Investment Return</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Profit ÷ everything you spent</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Total cost: <span className="font-medium text-foreground tabular-nums">{aed(totalCost)}</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">(property + all fees + renovation)</p>
               </div>
-            ))}
+              <span className={`text-2xl font-bold tabular-nums shrink-0 ${profitable ? "text-primary" : "text-destructive"}`}>
+                {(profitable ? "+" : "") + pct(roi)}
+              </span>
+            </div>
+          </div>
+
+          {/* Return on cash out of pocket */}
+          <div className={`rounded-xl p-3.5 ${profitable ? "bg-blue-50 dark:bg-blue-950/30" : "bg-destructive/8"}`}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1">
+                <p className="text-sm font-bold text-foreground">Cash-on-Cash Return</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Profit ÷ your actual cash out of pocket</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Cash invested: <span className="font-medium text-foreground tabular-nums">{aed(cashOut)}</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">(down payment + fees + renovation)</p>
+              </div>
+              <span className={`text-2xl font-bold tabular-nums shrink-0 ${profitable ? "text-blue-600 dark:text-blue-400" : "text-destructive"}`}>
+                {(mortgageRoiPct > 0 ? "+" : "") + pct(mortgageRoiPct)}
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -513,23 +550,7 @@ export default function Calculator() {
             </div>
           </div>
 
-          {hasBoth && cashOut > 0 && (
-            <div className={`mt-3 rounded-xl p-3 flex items-center justify-between ${profitable ? "bg-primary/10" : "bg-destructive/10"}`}>
-              <div>
-                <p className="text-xs text-muted-foreground">Return on cash invested</p>
-                <p className={`text-xl font-bold mt-0.5 tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
-                  {(profitable ? "+" : "") + pct(mortgageRoiPct)}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground">Profit</p>
-                <p className={`text-base font-bold mt-0.5 tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
-                  {aedSigned(profit)}
-                </p>
-              </div>
-            </div>
-          )}
-          {!hasBoth && <p className="text-xs text-muted-foreground mt-2 text-center">Enter a sale price to see your mortgage return</p>}
+          {!hasBoth && <p className="text-xs text-muted-foreground mt-2 text-center">Enter a sale price above to see your returns</p>}
         </div>
       )}
 
