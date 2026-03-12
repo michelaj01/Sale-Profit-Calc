@@ -447,9 +447,9 @@ export default function Calculator() {
             />
           </div>
 
-          {/* Actual Price — big */}
+          {/* Purchase Price — big */}
           <div className="px-4 pb-4">
-            <label className="block text-[10px] font-black tracking-[0.18em] text-muted-foreground uppercase mb-2">Actual Price</label>
+            <label className="block text-[10px] font-black tracking-[0.18em] text-muted-foreground uppercase mb-2">Purchase Price</label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground select-none">AED</span>
               <NumberInput
