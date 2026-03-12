@@ -564,6 +564,7 @@ export default function Calculator() {
               <div className="h-px bg-slate-100 dark:bg-slate-700/60 my-1" />
 
               {/* Preset fees */}
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-700/30 px-1 py-1">
               {([
                 { key: "bankProc",   label: "Bank Processing",   value: bankProcFee,  set: setBankProcFee },
                 { key: "valuation",  label: "Valuation Fee",     value: valuationFee, set: setValuationFee },
@@ -580,6 +581,7 @@ export default function Calculator() {
                   onDone={() => setEditing(e => ({ ...e, [key]: false }))}
                 />
               ))}
+              </div>
 
               {/* Total Acquisition */}
               <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-700/40 px-4 py-3 border border-slate-200/60 dark:border-slate-600/40">
