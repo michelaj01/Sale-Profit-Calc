@@ -224,7 +224,7 @@ function EditableAutoRow({
         </div>
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="text-sm font-semibold tabular-nums text-foreground">{aed(parseFloat(value) || 0)}</span>
+        <span className="text-sm font-semibold tabular-nums text-foreground">{aed(n(value))}</span>
         <button type="button" onClick={startEdit}
           className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground active:opacity-70 transition" title="Edit">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +313,6 @@ export default function Calculator() {
   const sale       = n(salePrice);
   const profit     = sale - totalCost;
   const profitPct  = totalCost ? (profit / totalCost) * 100 : 0;
-  const margin     = sale ? (profit / sale) * 100 : 0;
   const roi        = totalCost ? (profit / totalCost) * 100 : 0;
   const hasCosts   = totalCost > 0;
   const hasBoth    = hasCosts && sale > 0;
@@ -718,11 +717,6 @@ export default function Calculator() {
               <div className="flex-1">
                 <p className="text-white/50 text-[9px] font-black uppercase tracking-widest">Total Cost</p>
                 <p className="text-white text-sm font-black tabular-nums mt-0.5">{aed(totalCost)}</p>
-              </div>
-              <div className="w-px bg-white/20 mx-4" />
-              <div className="flex-1">
-                <p className="text-white/50 text-[9px] font-black uppercase tracking-widest">Margin</p>
-                <p className="text-white text-sm font-black tabular-nums mt-0.5">{pct(margin)}</p>
               </div>
             </div>
           </div>
