@@ -11,6 +11,11 @@ function currency(val: number, showSign = false) {
   return `${sign}AED ${fmt(Math.abs(val))}`;
 }
 
+const AGENCY_FEE_PCT = 0.02;
+const DLD_FEE_PCT = 0.04;
+const MORTGAGE_REG_PCT = 0.0025;
+const MORTGAGE_REG_FIXED = 290;
+
 const TIERS = [
   { label: "Breakeven", profit: 0, color: "text-muted-foreground", bg: "bg-muted/60", desc: "Zero profit" },
   { label: "Conservative", profit: 300_000, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/40", desc: "+AED 300K profit" },
@@ -23,19 +28,11 @@ interface CostItem {
   label: string;
   amount: string;
   scanning: boolean;
-  fixed?: boolean;
 }
 
 function newCostItem(): CostItem {
   return { id: crypto.randomUUID(), label: "", amount: "", scanning: false };
 }
-
-const ACQUISITION_ITEMS: Omit<CostItem, "scanning">[] = [
-  { id: "property-price", label: "Property Price", amount: "", fixed: true },
-  { id: "agency-fee", label: "Agency Fee", amount: "", fixed: true },
-  { id: "dld-fee", label: "DLD Fee", amount: "", fixed: true },
-  { id: "mortgage-reg-fee", label: "Mortgage Reg.", amount: "", fixed: true },
-];
 
 async function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -73,16 +70,18 @@ function ScanButton({ scanning, onClick }: { scanning: boolean; onClick: () => v
 
 export default function Calculator() {
   const [name, setName] = useState("");
-  const [acqItems, setAcqItems] = useState<CostItem[]>(
-    ACQUISITION_ITEMS.map(i => ({ ...i, scanning: false }))
-  );
+  const [propertyPrice, setPropertyPrice] = useState("");
   const [renoItems, setRenoItems] = useState<CostItem[]>([newCostItem()]);
   const [salePrice, setSalePrice] = useState("");
   const { toast } = useToast();
   const createItem = useCreateItem();
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const acqTotal = acqItems.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+  const propPrice = parseFloat(propertyPrice) || 0;
+  const agencyFee = propPrice * AGENCY_FEE_PCT;
+  const dldFee = propPrice * DLD_FEE_PCT;
+  const mortgageRegFee = propPrice > 0 ? propPrice * MORTGAGE_REG_PCT + MORTGAGE_REG_FIXED : 0;
+  const acqTotal = propPrice + agencyFee + dldFee + mortgageRegFee;
   const renoTotal = renoItems.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
   const totalCost = acqTotal + renoTotal;
   const sale = parseFloat(salePrice) || 0;
@@ -93,10 +92,6 @@ export default function Calculator() {
   const hasCosts = totalCost > 0;
   const hasBoth = hasCosts && sale > 0;
   const isProfitable = profit >= 0;
-
-  const updateAcqItem = useCallback((id: string, patch: Partial<CostItem>) => {
-    setAcqItems(prev => prev.map(i => i.id === id ? { ...i, ...patch } : i));
-  }, []);
 
   const updateRenoItem = useCallback((id: string, patch: Partial<CostItem>) => {
     setRenoItems(prev => prev.map(i => i.id === id ? { ...i, ...patch } : i));
@@ -136,7 +131,7 @@ export default function Calculator() {
 
   async function handleSave() {
     if (!name.trim()) { toast({ title: "Enter a property name", variant: "destructive" }); return; }
-    if (!acqTotal || !sale) { toast({ title: "Enter acquisition costs and sale price", variant: "destructive" }); return; }
+    if (!propPrice || !sale) { toast({ title: "Enter property price and sale price", variant: "destructive" }); return; }
     const validReno = renoItems.filter(i => i.label.trim() && parseFloat(i.amount) > 0);
     await createItem.mutateAsync({
       data: {
@@ -149,7 +144,7 @@ export default function Calculator() {
     });
     toast({ title: "Property saved!" });
     setName("");
-    setAcqItems(ACQUISITION_ITEMS.map(i => ({ ...i, scanning: false })));
+    setPropertyPrice("");
     setRenoItems([newCostItem()]);
     setSalePrice("");
   }
@@ -242,17 +237,52 @@ export default function Calculator() {
         </div>
 
         {/* Acquisition Costs */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground">Acquisition Costs</label>
             {acqTotal > 0 && (
               <span className="text-xs font-semibold text-foreground">AED {fmt(acqTotal)}</span>
             )}
           </div>
-          {acqItems.map(item =>
-            renderCostRow(item, updateAcqItem, { labelEditable: false })
+
+          {/* Property Price — only manual input */}
+          <div className="flex items-center gap-2">
+            <span className="w-28 shrink-0 text-sm text-foreground font-medium px-1 whitespace-nowrap">Property Price</span>
+            <div className="relative flex-1 min-w-0">
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold">AED</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={propertyPrice}
+                onChange={e => setPropertyPrice(e.target.value)}
+                placeholder="0"
+                className="w-full rounded-lg border border-input bg-background pl-12 pr-2 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+              />
+            </div>
+          </div>
+
+          {/* Auto-computed fees — read only */}
+          {propPrice > 0 && (
+            <div className="flex flex-col gap-1.5 bg-muted/40 rounded-lg px-3 py-2.5">
+              {[
+                { label: "Agency Fee", sub: "2%", val: agencyFee },
+                { label: "DLD Fee", sub: "4%", val: dldFee },
+                { label: "Mortgage Reg.", sub: "0.25% + 290", val: mortgageRegFee },
+              ].map(row => (
+                <div key={row.label} className="flex items-center justify-between">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-sm text-foreground">{row.label}</span>
+                    <span className="text-[11px] text-muted-foreground">{row.sub}</span>
+                  </div>
+                  <span className="text-sm font-medium text-foreground">AED {fmt(row.val)}</span>
+                </div>
+              ))}
+              <div className="border-t border-border mt-1 pt-1.5 flex items-center justify-between">
+                <span className="text-sm font-semibold text-foreground">Total Acquisition</span>
+                <span className="text-sm font-bold text-foreground">AED {fmt(acqTotal)}</span>
+              </div>
+            </div>
           )}
-          <p className="text-xs text-muted-foreground">Tap 📷 on any row to scan a document</p>
         </div>
 
         <div className="h-px bg-border" />
@@ -370,7 +400,7 @@ export default function Calculator() {
       {/* Save */}
       <button
         onClick={handleSave}
-        disabled={createItem.isPending || !name.trim() || !acqTotal || !sale}
+        disabled={createItem.isPending || !name.trim() || !propPrice || !sale}
         className="w-full rounded-xl bg-primary text-primary-foreground font-semibold py-4 text-base shadow-sm active:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition"
       >
         {createItem.isPending ? "Saving..." : "Save Property"}
