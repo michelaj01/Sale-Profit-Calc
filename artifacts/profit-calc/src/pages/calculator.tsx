@@ -377,10 +377,6 @@ export default function Calculator() {
 
         {/* ── Acquisition Costs ── */}
         <div className="flex flex-col gap-2.5">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-foreground">Acquisition Costs</label>
-            {propPrice > 0 && <span className="text-xs font-semibold tabular-nums text-foreground">{aed(acqTotal)}</span>}
-          </div>
 
           {/* Property price input */}
           <div className="flex items-center gap-2">
