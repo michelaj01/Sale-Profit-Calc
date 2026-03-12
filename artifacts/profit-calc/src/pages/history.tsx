@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useListItems, useDeleteItem } from "@workspace/api-client-react";
+import type { RawInputs } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
 function fmt(val: number) {
@@ -24,7 +25,7 @@ function ProfitBadge({ value, label }: { value: number; label: string }) {
   );
 }
 
-export default function History() {
+export default function History({ onLoad }: { onLoad: (data: RawInputs) => void }) {
   const { data: items = [], isLoading, refetch } = useListItems();
   const deleteItem = useDeleteItem();
   const { toast } = useToast();
@@ -209,25 +210,38 @@ export default function History() {
                       </p>
                     </div>
 
-                    {/* Footer: date + delete */}
+                    {/* Footer: date + actions */}
                     <div className="flex items-center justify-between mt-4">
                       <p className="text-xs text-muted-foreground">
                         Saved {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </p>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        disabled={deletingId === item.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-destructive bg-destructive/10 hover:bg-destructive/20 transition disabled:opacity-40"
-                      >
-                        {deletingId === item.id ? (
-                          <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                      <div className="flex items-center gap-2">
+                        {item.rawInputs && (
+                          <button
+                            onClick={() => onLoad(item.rawInputs!)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-primary bg-primary/10 active:bg-primary/20 transition"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit
+                          </button>
                         )}
-                        Remove
-                      </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          disabled={deletingId === item.id}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-destructive bg-destructive/10 active:bg-destructive/20 transition disabled:opacity-40"
+                        >
+                          {deletingId === item.id ? (
+                            <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          )}
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

@@ -42,6 +42,26 @@ export const ListItemsResponse = zod.array(ListItemsResponseItem);
 /**
  * @summary Create a new item
  */
+const RawInputsSchema = zod.object({
+  name: zod.string(),
+  propertyPrice: zod.string(),
+  mouPrice: zod.string(),
+  bankValuation: zod.string(),
+  showAdvanced: zod.boolean(),
+  gapPaymentOvr: zod.string().nullable(),
+  agencyFeeOvr: zod.string().nullable(),
+  dldFeeOvr: zod.string().nullable(),
+  trusteeFeeOvr: zod.string().nullable(),
+  mortgageRegOvr: zod.string().nullable(),
+  bankProcFee: zod.string(),
+  valuationFee: zod.string(),
+  nocFee: zod.string(),
+  serviceFee: zod.string(),
+  downPaymentPct: zod.string(),
+  renoItems: zod.array(zod.object({ id: zod.string(), label: zod.string(), amount: zod.string(), note: zod.string() })),
+  salePrice: zod.string(),
+}).nullable().optional();
+
 export const CreateItemBody = zod.object({
   name: zod.string(),
   acquisitionCost: zod.number(),
@@ -55,6 +75,7 @@ export const CreateItemBody = zod.object({
     )
     .optional(),
   salePrice: zod.number(),
+  rawInputs: RawInputsSchema,
 });
 
 /**
@@ -77,6 +98,7 @@ export const UpdateItemBody = zod.object({
     )
     .optional(),
   salePrice: zod.number(),
+  rawInputs: RawInputsSchema,
 });
 
 export const UpdateItemResponse = zod.object({

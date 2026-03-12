@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CostItem } from "./costItem";
+import type { RawInputs } from "./item";
 
 export interface CreateItemRequest {
   name: string;
@@ -13,4 +14,5 @@ export interface CreateItemRequest {
   renovationCost?: number;
   costItems?: CostItem[];
   salePrice: number;
+  rawInputs?: RawInputs | null;
 }

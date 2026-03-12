@@ -7,6 +7,26 @@
  */
 import type { CostItem } from "./costItem";
 
+export interface RawInputs {
+  name: string;
+  propertyPrice: string;
+  mouPrice: string;
+  bankValuation: string;
+  showAdvanced: boolean;
+  gapPaymentOvr: string | null;
+  agencyFeeOvr: string | null;
+  dldFeeOvr: string | null;
+  trusteeFeeOvr: string | null;
+  mortgageRegOvr: string | null;
+  bankProcFee: string;
+  valuationFee: string;
+  nocFee: string;
+  serviceFee: string;
+  downPaymentPct: string;
+  renoItems: Array<{ id: string; label: string; amount: string; note: string }>;
+  salePrice: string;
+}
+
 export interface Item {
   id: number;
   name: string;
@@ -18,5 +38,6 @@ export interface Item {
   profit: number;
   profitMargin: number;
   roi: number;
+  rawInputs?: RawInputs | null;
   createdAt: Date;
 }

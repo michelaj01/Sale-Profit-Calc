@@ -42,6 +42,7 @@ function mapItem(row: typeof itemsTable.$inferSelect) {
     profit,
     profitMargin,
     roi,
+    rawInputs: row.rawInputs ?? null,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -57,7 +58,7 @@ router.post("/items", async (req, res) => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { name, acquisitionCost, renovationCost, costItems, salePrice } = parsed.data;
+  const { name, acquisitionCost, renovationCost, costItems, salePrice, rawInputs } = parsed.data;
   const [row] = await db
     .insert(itemsTable)
     .values({
@@ -66,6 +67,7 @@ router.post("/items", async (req, res) => {
       renovationCost: (renovationCost ?? 0).toString(),
       costItems: costItems ?? [],
       salePrice: salePrice.toString(),
+      rawInputs: rawInputs ?? null,
     })
     .returning();
   res.status(201).json(mapItem(row));
@@ -82,7 +84,7 @@ router.put("/items/:id", async (req, res) => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { name, acquisitionCost, renovationCost, costItems, salePrice } = parsed.data;
+  const { name, acquisitionCost, renovationCost, costItems, salePrice, rawInputs } = parsed.data;
   const [row] = await db
     .update(itemsTable)
     .set({
@@ -91,6 +93,7 @@ router.put("/items/:id", async (req, res) => {
       renovationCost: (renovationCost ?? 0).toString(),
       costItems: costItems ?? [],
       salePrice: salePrice.toString(),
+      rawInputs: rawInputs ?? null,
     })
     .where(eq(itemsTable.id, params.data.id))
     .returning();
