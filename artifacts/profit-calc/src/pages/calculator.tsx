@@ -614,7 +614,7 @@ export default function Calculator() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Cash invested: <span className="font-medium text-foreground tabular-nums">{aed(cashOut)}</span>
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">(down payment + fees + renovation)</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">(down payment{gapPaymentN > 0 ? " + gap payment" : ""} + fees + renovation)</p>
               </div>
               <div className="flex flex-col items-end gap-0.5 shrink-0">
                 <span className={`text-lg font-bold tabular-nums ${profitable ? "text-blue-600 dark:text-blue-400" : "text-destructive"}`}>
