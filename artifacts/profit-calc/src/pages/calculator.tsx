@@ -16,7 +16,7 @@ function stripCommas(s: string): string {
 }
 
 function n(raw: string): number {
-  return parseFloat(raw) || 0;
+  return parseFloat(raw.replace(/,/g, "")) || 0;
 }
 
 function aed(val: number): string {
