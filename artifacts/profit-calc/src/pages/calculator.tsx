@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useCreateItem } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -248,10 +248,22 @@ export default function Calculator() {
   const [name, setName] = useState("");
 
   const [propertyPrice, setPropertyPrice] = useState("");
-  const [bankProcFee, setBankProcFee]     = useState(DEFAULTS.bankProcFee);
-  const [valuationFee, setValuationFee]   = useState(DEFAULTS.valuationFee);
-  const [nocFee, setNocFee]               = useState(DEFAULTS.nocFee);
-  const [serviceFee, setServiceFee]       = useState(DEFAULTS.serviceFee);
+  const [bankProcFee, setBankProcFee]     = useState("");
+  const [valuationFee, setValuationFee]   = useState("");
+  const [nocFee, setNocFee]               = useState("");
+  const [serviceFee, setServiceFee]       = useState("");
+  const [feesPopulated, setFeesPopulated] = useState(false);
+
+  // Auto-populate preset fees the first time a property price is entered
+  useEffect(() => {
+    if (n(propertyPrice) > 0 && !feesPopulated) {
+      setBankProcFee(fmtDisplay(DEFAULTS.bankProcFee));
+      setValuationFee(fmtDisplay(DEFAULTS.valuationFee));
+      setNocFee(fmtDisplay(DEFAULTS.nocFee));
+      setServiceFee(fmtDisplay(DEFAULTS.serviceFee));
+      setFeesPopulated(true);
+    }
+  }, [propertyPrice, feesPopulated]);
 
   const [showAdvanced,   setShowAdvanced]   = useState(false);
   const [mouPrice,       setMouPrice]       = useState("");
@@ -358,7 +370,7 @@ export default function Calculator() {
       },
     });
     toast({ title: "Property saved!" });
-    setName(""); setPropertyPrice(""); setBankProcFee(""); setValuationFee(""); setNocFee(""); setServiceFee("");
+    setName(""); setPropertyPrice(""); setBankProcFee(""); setValuationFee(""); setNocFee(""); setServiceFee(""); setFeesPopulated(false);
     setMouPrice(""); setBankValuation(""); setGapPaymentOvr(null); setShowAdvanced(false);
     setAgencyFeeOvr(null); setDldFeeOvr(null); setTrusteeFeeOvr(null); setMortgageRegOvr(null);
     setRenoItems([newCostItem()]); setSalePrice("");
