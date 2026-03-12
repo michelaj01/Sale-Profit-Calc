@@ -257,10 +257,10 @@ export default function Calculator() {
   // Auto-populate preset fees the first time a property price is entered
   useEffect(() => {
     if (n(propertyPrice) > 0 && !feesPopulated) {
-      setBankProcFee(fmtDisplay(DEFAULTS.bankProcFee));
-      setValuationFee(fmtDisplay(DEFAULTS.valuationFee));
-      setNocFee(fmtDisplay(DEFAULTS.nocFee));
-      setServiceFee(fmtDisplay(DEFAULTS.serviceFee));
+      setBankProcFee(DEFAULTS.bankProcFee);
+      setValuationFee(DEFAULTS.valuationFee);
+      setNocFee(DEFAULTS.nocFee);
+      setServiceFee(DEFAULTS.serviceFee);
       setFeesPopulated(true);
     }
   }, [propertyPrice, feesPopulated]);
