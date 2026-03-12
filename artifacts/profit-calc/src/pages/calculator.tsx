@@ -250,7 +250,7 @@ export default function Calculator() {
   const [showAdvanced,   setShowAdvanced]   = useState(false);
   const [mouPrice,       setMouPrice]       = useState("");   // MOU/contract price → DLD fee basis
   const [bankValuation,  setBankValuation]  = useState("");   // Bank valuation → mortgage reg basis
-  const [gapPayment,     setGapPayment]     = useState("");   // Cash gap paid to seller
+  const [gapPaymentOvr,  setGapPaymentOvr]  = useState<string | null>(null); // null = auto (actual − MOU)
 
   // Override states for auto-computed fees (null = use formula)
   const [agencyFeeOvr,   setAgencyFeeOvr]   = useState<string | null>(null);
@@ -276,7 +276,8 @@ export default function Calculator() {
   const propPrice      = n(propertyPrice);
   const mouPriceN      = showAdvanced && mouPrice      ? n(mouPrice)      : propPrice;
   const bankValN       = showAdvanced && bankValuation ? n(bankValuation) : propPrice;
-  const gapPaymentN    = showAdvanced ? n(gapPayment) : 0;
+  const gapPaymentCalc = showAdvanced && propPrice > 0 && mouPriceN > 0 ? Math.max(0, propPrice - mouPriceN) : 0;
+  const gapPaymentN    = showAdvanced ? (gapPaymentOvr !== null ? n(gapPaymentOvr) : gapPaymentCalc) : 0;
 
   // Fee basis: agency on actual price, DLD on MOU, mortgage reg on bank val
   const agencyFeeCalc   = propPrice * AGENCY_FEE_PCT * (1 + AGENCY_VAT_PCT);
@@ -359,7 +360,7 @@ export default function Calculator() {
     });
     toast({ title: "Property saved!" });
     setName(""); setPropertyPrice(""); setBankProcFee(""); setValuationFee(""); setNocFee(""); setServiceFee("");
-    setMouPrice(""); setBankValuation(""); setGapPayment(""); setShowAdvanced(false);
+    setMouPrice(""); setBankValuation(""); setGapPaymentOvr(null); setShowAdvanced(false);
     setRenoItems([newCostItem()]); setSalePrice("");
   }
 
@@ -428,10 +429,20 @@ export default function Calculator() {
               </div>
 
               <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-32 shrink-0 text-sm text-foreground">Gap Payment</span>
-                  <AEDInput value={gapPayment} onChange={setGapPayment} placeholder="Cash to seller" className="flex-1 min-w-0" />
-                </div>
+                <EditableAutoRow
+                  label="Gap Payment"
+                  sub="actual − MOU"
+                  value={gapPaymentOvr !== null ? gapPaymentOvr : gapPaymentCalc.toFixed(2)}
+                  onChange={v => setGapPaymentOvr(v)}
+                  isEditing={!!editing["gapPayment"]}
+                  onEdit={() => {
+                    setEditing(e => ({ ...e, gapPayment: true }));
+                    if (gapPaymentOvr === null) setGapPaymentOvr(gapPaymentCalc.toFixed(2));
+                  }}
+                  onDone={() => setEditing(e => ({ ...e, gapPayment: false }))}
+                  onReset={() => setGapPaymentOvr(null)}
+                  isOverridden={gapPaymentOvr !== null}
+                />
                 <p className="text-[11px] text-muted-foreground ml-[8.5rem]">Extra cash paid above MOU (added to cost)</p>
               </div>
             </div>
