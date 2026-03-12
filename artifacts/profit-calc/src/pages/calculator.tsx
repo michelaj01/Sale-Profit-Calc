@@ -5,7 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 function fmt(val: number) {
   return val.toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-
+function fmtShort(val: number) {
+  return val.toLocaleString("en-AE", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
 function currency(val: number, showSign = false) {
   const sign = showSign && val > 0 ? "+" : showSign && val < 0 ? "−" : "";
   return `${sign}AED ${fmt(Math.abs(val))}`;
@@ -17,11 +19,63 @@ const MORTGAGE_REG_PCT = 0.0025;
 const MORTGAGE_REG_FIXED = 290;
 
 const TIERS = [
-  { label: "Breakeven", profit: 0, color: "text-muted-foreground", bg: "bg-muted/60", desc: "Zero profit" },
-  { label: "Conservative", profit: 300_000, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/40", desc: "+AED 300K profit" },
-  { label: "Moderate", profit: 500_000, color: "text-primary", bg: "bg-green-50 dark:bg-green-950/40", desc: "+AED 500K profit" },
-  { label: "Ambitious", profit: 800_000, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/40", desc: "+AED 800K profit" },
+  {
+    label: "Breakeven",
+    minProfit: 0,
+    maxProfit: 300_000,
+    targetProfit: 0,
+    color: "text-muted-foreground",
+    activeColor: "text-slate-700 dark:text-slate-200",
+    bg: "bg-muted/60",
+    activeBg: "bg-slate-100 dark:bg-slate-800",
+    ring: "ring-slate-400",
+    desc: "Zero profit",
+  },
+  {
+    label: "Conservative",
+    minProfit: 300_000,
+    maxProfit: 500_000,
+    targetProfit: 300_000,
+    color: "text-blue-500",
+    activeColor: "text-blue-600",
+    bg: "bg-blue-50 dark:bg-blue-950/40",
+    activeBg: "bg-blue-100 dark:bg-blue-900/60",
+    ring: "ring-blue-500",
+    desc: "+AED 300K profit",
+  },
+  {
+    label: "Moderate",
+    minProfit: 500_000,
+    maxProfit: 800_000,
+    targetProfit: 500_000,
+    color: "text-emerald-600",
+    activeColor: "text-emerald-700",
+    bg: "bg-green-50 dark:bg-green-950/40",
+    activeBg: "bg-emerald-100 dark:bg-emerald-900/60",
+    ring: "ring-emerald-500",
+    desc: "+AED 500K profit",
+  },
+  {
+    label: "Ambitious",
+    minProfit: 800_000,
+    maxProfit: Infinity,
+    targetProfit: 800_000,
+    color: "text-amber-500",
+    activeColor: "text-amber-600",
+    bg: "bg-amber-50 dark:bg-amber-950/40",
+    activeBg: "bg-amber-100 dark:bg-amber-900/60",
+    ring: "ring-amber-500",
+    desc: "+AED 800K profit",
+  },
 ];
+
+function getActiveTierLabel(profit: number): string | null {
+  if (profit < 0) return null;
+  for (const t of TIERS) {
+    if (profit >= t.minProfit && profit < t.maxProfit) return t.label;
+  }
+  return "Ambitious";
+}
 
 interface CostItem {
   id: string;
@@ -73,6 +127,7 @@ export default function Calculator() {
   const [propertyPrice, setPropertyPrice] = useState("");
   const [renoItems, setRenoItems] = useState<CostItem[]>([newCostItem()]);
   const [salePrice, setSalePrice] = useState("");
+  const [downPct, setDownPct] = useState("20");
   const { toast } = useToast();
   const createItem = useCreateItem();
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -92,6 +147,13 @@ export default function Calculator() {
   const hasCosts = totalCost > 0;
   const hasBoth = hasCosts && sale > 0;
   const isProfitable = profit >= 0;
+  const activeTierLabel = hasBoth ? getActiveTierLabel(profit) : null;
+
+  // Mortgage ROI
+  const dpPct = Math.min(100, Math.max(0, parseFloat(downPct) || 20)) / 100;
+  const downPayment = propPrice * dpPct;
+  const cashOut = downPayment + agencyFee + dldFee + mortgageRegFee + renoTotal;
+  const mortgageRoi = cashOut > 0 ? (profit / cashOut) * 100 : 0;
 
   const updateRenoItem = useCallback((id: string, patch: Partial<CostItem>) => {
     setRenoItems(prev => prev.map(i => i.id === id ? { ...i, ...patch } : i));
@@ -101,12 +163,8 @@ export default function Calculator() {
     setRenoItems(prev => prev.length > 1 ? prev.filter(i => i.id !== id) : prev);
   }, []);
 
-  const handleScan = useCallback(async (
-    id: string,
-    file: File,
-    update: (id: string, patch: Partial<CostItem>) => void
-  ) => {
-    update(id, { scanning: true });
+  const handleScan = useCallback(async (id: string, file: File) => {
+    updateRenoItem(id, { scanning: true });
     try {
       const base64 = await fileToBase64(file);
       const res = await fetch("/api/extract-amount", {
@@ -117,17 +175,17 @@ export default function Calculator() {
       if (!res.ok) throw new Error("Failed");
       const { amount } = await res.json() as { amount: number; confidence: string };
       if (amount > 0) {
-        update(id, { amount: amount.toString(), scanning: false });
+        updateRenoItem(id, { amount: amount.toString(), scanning: false });
         toast({ title: `Scanned: AED ${fmt(amount)}` });
       } else {
-        update(id, { scanning: false });
+        updateRenoItem(id, { scanning: false });
         toast({ title: "Could not read amount", description: "Enter it manually", variant: "destructive" });
       }
     } catch {
-      update(id, { scanning: false });
+      updateRenoItem(id, { scanning: false });
       toast({ title: "Scan failed", description: "Enter amount manually", variant: "destructive" });
     }
-  }, [toast]);
+  }, [updateRenoItem, toast]);
 
   async function handleSave() {
     if (!name.trim()) { toast({ title: "Enter a property name", variant: "destructive" }); return; }
@@ -149,73 +207,6 @@ export default function Calculator() {
     setSalePrice("");
   }
 
-  function renderCostRow(
-    item: CostItem,
-    onAmountChange: (id: string, patch: Partial<CostItem>) => void,
-    opts?: {
-      labelEditable?: boolean;
-      onLabelChange?: (id: string, label: string) => void;
-      onRemove?: (id: string) => void;
-      placeholder?: string;
-    }
-  ) {
-    const { labelEditable = false, onLabelChange, onRemove, placeholder } = opts ?? {};
-    return (
-      <div key={item.id} className="flex gap-2 items-center">
-        {labelEditable ? (
-          <input
-            type="text"
-            value={item.label}
-            onChange={e => onLabelChange?.(item.id, e.target.value)}
-            placeholder={placeholder ?? "Item"}
-            className="w-28 shrink-0 rounded-lg border border-input bg-background px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-          />
-        ) : (
-          <span className="w-28 shrink-0 text-sm text-foreground font-medium px-1 whitespace-nowrap">{item.label}</span>
-        )}
-
-        <div className="relative flex-1 min-w-0">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold">AED</span>
-          <input
-            type="number"
-            inputMode="decimal"
-            value={item.amount}
-            onChange={e => onAmountChange(item.id, { amount: e.target.value })}
-            placeholder="0"
-            className="w-full rounded-lg border border-input bg-background pl-12 pr-2 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-          />
-        </div>
-
-        <ScanButton scanning={item.scanning} onClick={() => fileInputRefs.current[item.id]?.click()} />
-
-        <input
-          ref={el => { fileInputRefs.current[item.id] = el; }}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={e => {
-            const file = e.target.files?.[0];
-            if (file) handleScan(item.id, file, onAmountChange);
-            e.target.value = "";
-          }}
-        />
-
-        {onRemove && (
-          <button
-            type="button"
-            onClick={() => onRemove(item.id)}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive active:opacity-70 transition"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-5 p-4 max-w-md mx-auto pb-8">
       <div>
@@ -223,7 +214,9 @@ export default function Calculator() {
         <p className="text-sm text-muted-foreground">Calculate your profit potential</p>
       </div>
 
+      {/* Input card */}
       <div className="bg-card border border-card-border rounded-xl p-4 flex flex-col gap-4 shadow-sm">
+
         {/* Property Name */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-foreground">Property Name</label>
@@ -240,12 +233,8 @@ export default function Calculator() {
         <div className="flex flex-col gap-2.5">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground">Acquisition Costs</label>
-            {acqTotal > 0 && (
-              <span className="text-xs font-semibold text-foreground">AED {fmt(acqTotal)}</span>
-            )}
+            {acqTotal > 0 && <span className="text-xs font-semibold text-foreground">AED {fmt(acqTotal)}</span>}
           </div>
-
-          {/* Property Price — only manual input */}
           <div className="flex items-center gap-2">
             <span className="w-28 shrink-0 text-sm text-foreground font-medium px-1 whitespace-nowrap">Property Price</span>
             <div className="relative flex-1 min-w-0">
@@ -260,8 +249,6 @@ export default function Calculator() {
               />
             </div>
           </div>
-
-          {/* Auto-computed fees — read only */}
           {propPrice > 0 && (
             <div className="flex flex-col gap-1.5 bg-muted/40 rounded-lg px-3 py-2.5">
               {[
@@ -291,23 +278,46 @@ export default function Calculator() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground">Renovation Costs</label>
-            {renoTotal > 0 && (
-              <span className="text-xs font-semibold text-primary">AED {fmt(renoTotal)}</span>
-            )}
+            {renoTotal > 0 && <span className="text-xs font-semibold text-primary">AED {fmt(renoTotal)}</span>}
           </div>
-          {renoItems.map((item, idx) =>
-            renderCostRow(item, updateRenoItem, {
-              labelEditable: true,
-              onLabelChange: (id, label) => updateRenoItem(id, { label }),
-              onRemove: renoItems.length > 1 ? removeRenoItem : undefined,
-              placeholder: `Item ${idx + 1}`,
-            })
-          )}
-          <button
-            type="button"
-            onClick={() => setRenoItems(prev => [...prev, newCostItem()])}
-            className="flex items-center gap-1.5 text-sm text-primary font-medium py-1 active:opacity-70 transition"
-          >
+          {renoItems.map((item, idx) => (
+            <div key={item.id} className="flex gap-2 items-center">
+              <input
+                type="text"
+                value={item.label}
+                onChange={e => updateRenoItem(item.id, { label: e.target.value })}
+                placeholder={`Item ${idx + 1}`}
+                className="w-28 shrink-0 rounded-lg border border-input bg-background px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+              />
+              <div className="relative flex-1 min-w-0">
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold">AED</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={item.amount}
+                  onChange={e => updateRenoItem(item.id, { amount: e.target.value })}
+                  placeholder="0"
+                  className="w-full rounded-lg border border-input bg-background pl-12 pr-2 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+                />
+              </div>
+              <ScanButton scanning={item.scanning} onClick={() => fileInputRefs.current[item.id]?.click()} />
+              <input
+                ref={el => { fileInputRefs.current[item.id] = el; }}
+                type="file" accept="image/*" capture="environment" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleScan(item.id, f); e.target.value = ""; }}
+              />
+              {renoItems.length > 1 && (
+                <button type="button" onClick={() => removeRenoItem(item.id)}
+                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive active:opacity-70 transition">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          ))}
+          <button type="button" onClick={() => setRenoItems(prev => [...prev, newCostItem()])}
+            className="flex items-center gap-1.5 text-sm text-primary font-medium py-1 active:opacity-70 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
@@ -372,28 +382,118 @@ export default function Calculator() {
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Price Targets</p>
           <div className="flex flex-col gap-2">
             {TIERS.map(tier => {
-              const price = totalCost + tier.profit;
-              const isSelected = sale > 0 && Math.abs(sale - price) < 1;
+              const tierPrice = totalCost + tier.targetProfit;
+              const tierProfit = tierPrice - totalCost;
+              const tierProfitPct = totalCost !== 0 ? (tierProfit / totalCost) * 100 : 0;
+              const isActive = activeTierLabel === tier.label;
+              const isTapped = sale > 0 && Math.abs(sale - tierPrice) < 1;
+
               return (
                 <button
                   key={tier.label}
-                  onClick={() => setSalePrice(price.toString())}
-                  className={`w-full flex items-center justify-between rounded-lg px-4 py-3 border transition active:opacity-80 ${isSelected ? "border-primary ring-1 ring-primary" : "border-border"} ${tier.bg}`}
+                  onClick={() => setSalePrice(tierPrice.toString())}
+                  className={`w-full flex items-center justify-between rounded-xl px-4 py-3 border-2 transition active:opacity-80
+                    ${isActive
+                      ? `${tier.activeBg} border-current ${tier.ring} ring-2 shadow-sm`
+                      : isTapped
+                        ? `${tier.bg} border-current ${tier.ring} ring-1`
+                        : `${tier.bg} border-transparent`
+                    }`}
                 >
                   <div className="flex flex-col items-start gap-0.5">
-                    <span className={`text-sm font-semibold ${tier.color}`}>{tier.label}</span>
-                    <span className="text-xs text-muted-foreground">{tier.desc}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-bold ${isActive ? tier.activeColor : tier.color}`}>{tier.label}</span>
+                      {isActive && (
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tier.activeBg} ${tier.activeColor} border border-current`}>
+                          YOUR PRICE
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">Sell at AED {fmtShort(tierPrice)}</span>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-base font-bold text-foreground">AED {fmt(price)}</span>
-                    {tier.profit > 0 && <span className={`text-xs font-medium ${tier.color}`}>+AED {fmt(tier.profit)}</span>}
-                    {tier.profit === 0 && <span className="text-xs text-muted-foreground">No profit</span>}
+                    <span className={`text-base font-bold ${tier.targetProfit > 0 ? tier.color : "text-muted-foreground"}`}>
+                      {tier.targetProfit > 0 ? `+AED ${fmtShort(tier.targetProfit)}` : "AED 0"}
+                    </span>
+                    <span className={`text-xs font-semibold ${tier.targetProfit > 0 ? tier.color : "text-muted-foreground"}`}>
+                      {tier.targetProfit > 0 ? `+${fmt(tierProfitPct)}%` : "0%"}
+                    </span>
                   </div>
                 </button>
               );
             })}
           </div>
-          <p className="text-xs text-muted-foreground mt-2 text-center">Tap a tier to set it as your sale price</p>
+          {!activeTierLabel && hasBoth && (
+            <p className="text-xs text-destructive mt-2 text-center font-medium">Below breakeven — selling at a loss</p>
+          )}
+          {!hasBoth && (
+            <p className="text-xs text-muted-foreground mt-2 text-center">Enter a sale price to see your tier</p>
+          )}
+        </div>
+      )}
+
+      {/* Mortgage ROI */}
+      {hasCosts && (
+        <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Mortgage Return</p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">Down</span>
+              <div className="relative w-16">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={downPct}
+                  onChange={e => setDownPct(e.target.value)}
+                  min={1} max={100}
+                  className="w-full rounded-lg border border-input bg-background px-2 py-1 text-sm text-center text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+                />
+              </div>
+              <span className="text-xs text-muted-foreground">%</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5 text-sm">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Down payment ({downPct}%)</span>
+              <span className="font-medium text-foreground">AED {fmt(downPayment)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Fees (agency + DLD + reg)</span>
+              <span className="font-medium text-foreground">AED {fmt(agencyFee + dldFee + mortgageRegFee)}</span>
+            </div>
+            {renoTotal > 0 && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>Renovation costs</span>
+                <span className="font-medium text-foreground">AED {fmt(renoTotal)}</span>
+              </div>
+            )}
+            <div className="flex justify-between border-t border-border pt-1.5 mt-0.5">
+              <span className="font-semibold text-foreground">Total out of pocket</span>
+              <span className="font-bold text-foreground">AED {fmt(cashOut)}</span>
+            </div>
+          </div>
+
+          {hasBoth && cashOut > 0 && (
+            <div className={`mt-3 rounded-xl p-3 flex items-center justify-between ${isProfitable ? "bg-primary/10" : "bg-destructive/10"}`}>
+              <div>
+                <p className="text-xs text-muted-foreground">Return on cash invested</p>
+                <p className={`text-xl font-bold mt-0.5 ${isProfitable ? "text-primary" : "text-destructive"}`}>
+                  {isProfitable ? "+" : ""}{fmt(mortgageRoi)}%
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">Profit</p>
+                <p className={`text-base font-bold mt-0.5 ${isProfitable ? "text-primary" : "text-destructive"}`}>
+                  {currency(profit, true)}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!hasBoth && (
+            <p className="text-xs text-muted-foreground mt-2 text-center">Enter a sale price to see your mortgage return</p>
+          )}
         </div>
       )}
 
