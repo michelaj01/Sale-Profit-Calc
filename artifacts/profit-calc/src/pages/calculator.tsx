@@ -466,11 +466,12 @@ export default function Calculator() {
           <div className="px-4 pb-4">
             <button type="button"
               onClick={() => setShowAdvanced(v => !v)}
-              className="flex items-center gap-2 text-xs font-bold text-primary active:opacity-70 transition">
-              <svg className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvanced ? "rotate-90" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-              </svg>
-              {showAdvanced ? "Hide advanced pricing" : "Different MOU / bank valuation?"}
+              className="flex items-center justify-between w-full active:opacity-70 transition">
+              <span className="text-xs font-bold text-primary">Different MOU / bank valuation?</span>
+              {/* Toggle pill */}
+              <span className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${showAdvanced ? "bg-primary" : "bg-slate-200 dark:bg-slate-600"}`}>
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${showAdvanced ? "translate-x-5" : "translate-x-0"}`} />
+              </span>
             </button>
 
             {/* Advanced panel */}
