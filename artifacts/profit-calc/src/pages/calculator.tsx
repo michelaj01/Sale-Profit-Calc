@@ -40,7 +40,6 @@ const DLD_FEE_PCT      = 0.04;
 const TRUSTEE_FEE_FLAT = 4_200;
 const MORTGAGE_REG_PCT = 0.0025;
 
-// Default values for editable preset fees (typical Dubai market rates)
 const DEFAULTS = {
   bankProcFee: "10395",
   valuationFee: "3150",
@@ -49,10 +48,10 @@ const DEFAULTS = {
 } as const;
 
 const TIERS = [
-  { label: "Breakeven",    minProfit: 0,       maxProfit: 300_000,  targetProfit: 0,       color: "text-slate-500",    activeColor: "text-slate-700", bg: "bg-slate-50 dark:bg-slate-800/40",   activeBg: "bg-slate-100 dark:bg-slate-800",   ring: "ring-slate-400",  desc: "Zero profit" },
-  { label: "Conservative", minProfit: 300_000, maxProfit: 500_000,  targetProfit: 300_000, color: "text-blue-500",     activeColor: "text-blue-600",  bg: "bg-blue-50 dark:bg-blue-950/40",     activeBg: "bg-blue-100 dark:bg-blue-900/60",  ring: "ring-blue-500",   desc: "+AED 300K profit" },
-  { label: "Moderate",     minProfit: 500_000, maxProfit: 800_000,  targetProfit: 500_000, color: "text-emerald-600",  activeColor: "text-emerald-700", bg: "bg-green-50 dark:bg-green-950/40", activeBg: "bg-emerald-100 dark:bg-emerald-900/60", ring: "ring-emerald-500", desc: "+AED 500K profit" },
-  { label: "Ambitious",    minProfit: 800_000, maxProfit: Infinity, targetProfit: 800_000, color: "text-amber-500",    activeColor: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/40",   activeBg: "bg-amber-100 dark:bg-amber-900/60", ring: "ring-amber-500",  desc: "+AED 800K profit" },
+  { label: "Breakeven",    minProfit: 0,       maxProfit: 300_000,  targetProfit: 0,       color: "text-slate-500",   activeColor: "text-slate-700", bg: "bg-slate-50 dark:bg-slate-800/40",   activeBg: "bg-slate-100 dark:bg-slate-800",           ring: "ring-slate-400",  desc: "Zero profit" },
+  { label: "Conservative", minProfit: 300_000, maxProfit: 500_000,  targetProfit: 300_000, color: "text-blue-500",    activeColor: "text-blue-600",  bg: "bg-blue-50 dark:bg-blue-950/40",     activeBg: "bg-blue-100 dark:bg-blue-900/60",          ring: "ring-blue-500",   desc: "+AED 300K profit" },
+  { label: "Moderate",     minProfit: 500_000, maxProfit: 800_000,  targetProfit: 500_000, color: "text-emerald-600", activeColor: "text-emerald-700", bg: "bg-green-50 dark:bg-green-950/40", activeBg: "bg-emerald-100 dark:bg-emerald-900/60",    ring: "ring-emerald-500", desc: "+AED 500K profit" },
+  { label: "Ambitious",    minProfit: 800_000, maxProfit: Infinity, targetProfit: 800_000, color: "text-amber-500",   activeColor: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/40",   activeBg: "bg-amber-100 dark:bg-amber-900/60",        ring: "ring-amber-500",  desc: "+AED 800K profit" },
 ];
 
 function getActiveTier(profit: number): string | null {
@@ -92,7 +91,7 @@ function AEDInput({ value, onChange, placeholder, className }: { value: string; 
         value={value}
         onChange={onChange}
         placeholder={placeholder ?? "0"}
-        className="w-full rounded-lg border border-input bg-background pl-14 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+        className="w-full rounded-xl border border-input bg-background pl-14 pr-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
       />
     </div>
   );
@@ -106,7 +105,7 @@ function AEDRowInput({ value, onChange, placeholder }: { value: string; onChange
         value={value}
         onChange={onChange}
         placeholder={placeholder ?? "0"}
-        className="w-full rounded-lg border border-input bg-background pl-12 pr-2 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+        className="w-full rounded-xl border border-input bg-background pl-12 pr-2 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
       />
     </div>
   );
@@ -137,14 +136,14 @@ async function fileToBase64(file: File): Promise<string> {
 function ScanButton({ scanning, onClick }: { scanning: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} disabled={scanning}
-      className="shrink-0 w-11 h-11 flex items-center justify-center rounded-lg border border-input bg-background text-muted-foreground active:bg-muted transition disabled:opacity-50" title="Scan invoice">
+      className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl border border-input bg-background text-muted-foreground active:bg-muted transition disabled:opacity-50" title="Scan invoice">
       {scanning ? (
-        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
       ) : (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
@@ -153,7 +152,7 @@ function ScanButton({ scanning, onClick }: { scanning: boolean; onClick: () => v
   );
 }
 
-// ─── editable preset row ───────────────────────────────────────────────────
+// ─── editable row ──────────────────────────────────────────────────────────
 
 function EditableAutoRow({
   label, sub, value, onChange, isEditing, onEdit, onDone, onReset, isOverridden,
@@ -177,20 +176,22 @@ function EditableAutoRow({
 
   if (isEditing) {
     return (
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-baseline gap-1 shrink-0">
-          <span className="text-sm text-foreground">{label}</span>
-          {sub && <span className="text-[11px] text-muted-foreground">{sub}</span>}
-        </div>
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2 py-2.5">
+        {label && (
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+            <span className="text-sm text-foreground">{label}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1.5 ml-auto">
           {onReset && (
             <button type="button" onClick={() => { onReset(); onDone(); }}
-              className="text-[11px] text-primary font-semibold px-2 py-1 rounded-md bg-primary/10 active:opacity-70 transition whitespace-nowrap">
-              Reset auto
+              className="text-[11px] text-primary font-bold px-2.5 py-1.5 rounded-lg bg-primary/10 active:opacity-70 transition whitespace-nowrap">
+              Reset
             </button>
           )}
-          <div className="relative w-32">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold select-none">AED</span>
+          <div className="relative">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold">AED</span>
             <input
               ref={inputRef}
               type="text"
@@ -198,11 +199,11 @@ function EditableAutoRow({
               value={fmtDisplay(value)}
               onChange={e => onChange(stripCommas(e.target.value))}
               onKeyDown={e => e.key === "Enter" && onDone()}
-              className="w-full rounded-md border border-primary bg-background pl-10 pr-2 py-1.5 text-sm text-right text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+              className="w-32 rounded-xl border-2 border-primary bg-background pl-10 pr-2 py-1.5 text-sm text-right text-foreground focus:outline-none transition"
             />
           </div>
           <button type="button" onClick={onDone}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground active:opacity-80 transition">
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-primary text-primary-foreground active:opacity-80 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
@@ -213,18 +214,19 @@ function EditableAutoRow({
   }
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-sm text-foreground">{label}</span>
-        {sub && !isOverridden && <span className="text-[11px] text-muted-foreground">{sub}</span>}
-        {isOverridden && <span className="text-[10px] font-semibold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-full">edited</span>}
-      </div>
+    <div className="flex items-center justify-between py-2.5">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium tabular-nums text-foreground">
-          {aed(parseFloat(value) || 0)}
-        </span>
+        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isOverridden ? "bg-amber-400" : "bg-emerald-400"}`} />
+        <div className="flex items-baseline gap-1.5">
+          {label && <span className="text-sm text-foreground">{label}</span>}
+          {sub && !isOverridden && <span className="text-[11px] text-muted-foreground">{sub}</span>}
+          {isOverridden && <span className="text-[10px] font-bold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-full">edited</span>}
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-sm font-semibold tabular-nums text-foreground">{aed(parseFloat(value) || 0)}</span>
         <button type="button" onClick={startEdit}
-          className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground active:opacity-70 transition" title="Edit">
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground active:opacity-70 transition" title="Edit">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
@@ -234,37 +236,35 @@ function EditableAutoRow({
   );
 }
 
+// ─── section label ──────────────────────────────────────────────────────────
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <p className="text-[10px] font-black tracking-[0.18em] text-muted-foreground uppercase">{children}</p>;
+}
+
 // ─── main component ────────────────────────────────────────────────────────
 
 export default function Calculator() {
   const [name, setName] = useState("");
 
-  // Acquisition inputs
   const [propertyPrice, setPropertyPrice] = useState("");
   const [bankProcFee, setBankProcFee]     = useState(DEFAULTS.bankProcFee);
   const [valuationFee, setValuationFee]   = useState(DEFAULTS.valuationFee);
   const [nocFee, setNocFee]               = useState(DEFAULTS.nocFee);
   const [serviceFee, setServiceFee]       = useState(DEFAULTS.serviceFee);
 
-  // Advanced pricing (optional)
   const [showAdvanced,   setShowAdvanced]   = useState(false);
-  const [mouPrice,       setMouPrice]       = useState("");   // MOU/contract price → DLD fee basis
-  const [bankValuation,  setBankValuation]  = useState("");   // Bank valuation → mortgage reg basis
-  const [gapPaymentOvr,  setGapPaymentOvr]  = useState<string | null>(null); // null = auto (actual − MOU)
+  const [mouPrice,       setMouPrice]       = useState("");
+  const [bankValuation,  setBankValuation]  = useState("");
+  const [gapPaymentOvr,  setGapPaymentOvr]  = useState<string | null>(null);
 
-  // Override states for auto-computed fees (null = use formula)
   const [agencyFeeOvr,   setAgencyFeeOvr]   = useState<string | null>(null);
   const [dldFeeOvr,      setDldFeeOvr]      = useState<string | null>(null);
   const [trusteeFeeOvr,  setTrusteeFeeOvr]  = useState<string | null>(null);
   const [mortgageRegOvr, setMortgageRegOvr] = useState<string | null>(null);
 
-  // Editing states for all editable rows
   const [editing, setEditing] = useState<Record<string, boolean>>({});
-
-  // Renovation
   const [renoItems, setRenoItems] = useState<CostItem[]>([newCostItem()]);
-
-  // Sale & mortgage
   const [salePrice, setSalePrice] = useState("");
   const [downPct, setDownPct]     = useState("20");
 
@@ -276,12 +276,9 @@ export default function Calculator() {
   const propPrice      = n(propertyPrice);
   const mouPriceN      = showAdvanced && mouPrice      ? n(mouPrice)      : propPrice;
   const bankValN       = showAdvanced && bankValuation ? n(bankValuation) : propPrice;
-  // Gap = everything above what bank finances as asset value (actual − bank val)
-  // Down + Gap + Loan = actual price (no double count)
   const gapPaymentCalc = showAdvanced && propPrice > 0 && bankValN > 0 ? Math.max(0, propPrice - bankValN) : 0;
   const gapPaymentN    = showAdvanced ? (gapPaymentOvr !== null ? n(gapPaymentOvr) : gapPaymentCalc) : 0;
 
-  // Fee basis: agency on actual price, DLD on MOU, mortgage reg on bank val
   const agencyFeeCalc   = propPrice * AGENCY_FEE_PCT * (1 + AGENCY_VAT_PCT);
   const dldFeeCalc      = mouPriceN * DLD_FEE_PCT;
   const trusteeFeeCalc  = propPrice > 0 ? TRUSTEE_FEE_FLAT : 0;
@@ -289,16 +286,14 @@ export default function Calculator() {
   const loanAmount      = bankValN * (1 - downFrac);
   const mortgageRegCalc = loanAmount * MORTGAGE_REG_PCT;
 
-  // Use override if manually edited, otherwise use formula
   const agencyFee   = agencyFeeOvr   !== null ? n(agencyFeeOvr)   : agencyFeeCalc;
   const dldFee      = dldFeeOvr      !== null ? n(dldFeeOvr)      : dldFeeCalc;
   const trusteeFee  = trusteeFeeOvr  !== null ? n(trusteeFeeOvr)  : trusteeFeeCalc;
   const mortgageReg = mortgageRegOvr !== null ? n(mortgageRegOvr) : mortgageRegCalc;
 
-  const manualAcq   = n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee);
-  // bankValN + gapPaymentN = propPrice (no double count); simple mode: propPrice + 0 = propPrice
+  const manualAcq    = n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee);
   const propertyBase = showAdvanced ? bankValN : propPrice;
-  const acqTotal    = propertyBase + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
+  const acqTotal     = propertyBase + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
 
   // ── derived reno & totals ──────────────────────────────────────────────
   const renoTotal  = renoItems.reduce((s, i) => s + n(i.amount), 0);
@@ -314,8 +309,8 @@ export default function Calculator() {
   const activeTier = hasBoth ? getActiveTier(profit) : null;
 
   // ── mortgage return ────────────────────────────────────────────────────
-  const downPayment  = propertyBase * downFrac;
-  const cashOut      = downPayment + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq + renoTotal;
+  const downPayment    = propertyBase * downFrac;
+  const cashOut        = downPayment + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq + renoTotal;
   const mortgageRoiPct = cashOut > 0 ? (profit / cashOut) * 100 : 0;
 
   // ── handlers ──────────────────────────────────────────────────────────
@@ -365,466 +360,552 @@ export default function Calculator() {
     toast({ title: "Property saved!" });
     setName(""); setPropertyPrice(""); setBankProcFee(""); setValuationFee(""); setNocFee(""); setServiceFee("");
     setMouPrice(""); setBankValuation(""); setGapPaymentOvr(null); setShowAdvanced(false);
+    setAgencyFeeOvr(null); setDldFeeOvr(null); setTrusteeFeeOvr(null); setMortgageRegOvr(null);
     setRenoItems([newCostItem()]); setSalePrice("");
   }
 
-
   // ──────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-5 p-4 max-w-md mx-auto pb-8">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Profit Calculator</h1>
-        <p className="text-sm text-muted-foreground">Calculate your profit potential</p>
-      </div>
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 pb-28">
 
-      {/* ── Input card ── */}
-      <div className="bg-card border border-card-border rounded-xl p-4 flex flex-col gap-4 shadow-sm">
-
-        {/* Property Name */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-foreground">Property Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="e.g. Maple 89 Unit 4B"
-            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-          />
-        </div>
-
-        {/* ── Acquisition Costs ── */}
-        <div className="flex flex-col gap-2.5">
-
-          {/* Property price input */}
-          <div className="flex items-center gap-2">
-            <span className="w-32 shrink-0 text-sm font-medium text-foreground whitespace-nowrap">Actual Price</span>
-            <AEDInput value={propertyPrice} onChange={setPropertyPrice} className="flex-1 min-w-0" />
+      {/* ── HERO HEADER ── */}
+      <div className="bg-gradient-to-b from-slate-900 via-slate-850 to-slate-800 dark:from-slate-950 dark:to-slate-900 px-5 pt-10 pb-10">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[10px] font-black tracking-[0.2em] text-emerald-400 uppercase">Dubai Real Estate</p>
+                <h1 className="text-xl font-black text-white leading-tight">Profit Calculator</h1>
+              </div>
+            </div>
+            <div className="mt-1 bg-white/8 border border-white/15 rounded-xl px-3 py-1.5">
+              <span className="text-white/70 text-xs font-bold">AED</span>
+            </div>
           </div>
 
-          {/* Advanced pricing toggle */}
-          <button type="button"
-            onClick={() => setShowAdvanced(v => !v)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-primary active:opacity-70 transition self-start">
-            <svg className={`w-3.5 h-3.5 transition-transform ${showAdvanced ? "rotate-90" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
-            {showAdvanced ? "Hide advanced pricing" : "Different MOU / bank valuation?"}
-          </button>
-
-          {/* Advanced pricing fields */}
-          {showAdvanced && (
-            <div className="flex flex-col gap-2 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-3">
-              <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide">Advanced Pricing</p>
-
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-32 shrink-0 text-sm text-foreground">MOU Price</span>
-                  <AEDInput value={mouPrice} onChange={setMouPrice} placeholder="e.g. 4,990,000" className="flex-1 min-w-0" />
-                </div>
-                <p className="text-[11px] text-muted-foreground pl-34 ml-[8.5rem]">DLD fee (4%) is billed on this</p>
-              </div>
-
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-32 shrink-0 text-sm text-foreground">Bank Valuation</span>
-                  <AEDInput value={bankValuation} onChange={setBankValuation} placeholder="e.g. 4,950,000" className="flex-1 min-w-0" />
-                </div>
-                <p className="text-[11px] text-muted-foreground ml-[8.5rem]">Mortgage reg (0.25%) uses this</p>
-              </div>
-
-              <div className="flex flex-col gap-0.5">
-                <EditableAutoRow
-                  label="Gap Payment"
-                  sub="actual − bank val"
-                  value={gapPaymentOvr !== null ? gapPaymentOvr : gapPaymentCalc.toFixed(2)}
-                  onChange={v => setGapPaymentOvr(v)}
-                  isEditing={!!editing["gapPayment"]}
-                  onEdit={() => {
-                    setEditing(e => ({ ...e, gapPayment: true }));
-                    if (gapPaymentOvr === null) setGapPaymentOvr(gapPaymentCalc.toFixed(2));
-                  }}
-                  onDone={() => setEditing(e => ({ ...e, gapPayment: false }))}
-                  onReset={() => setGapPaymentOvr(null)}
-                  isOverridden={gapPaymentOvr !== null}
-                />
-                <p className="text-[11px] text-muted-foreground ml-[8.5rem]">Cash above bank valuation paid to seller</p>
+          {/* Live profit preview */}
+          {hasBoth && (
+            <div className={`mt-5 rounded-2xl p-4 border ${
+              profitable
+                ? "bg-emerald-500/15 border-emerald-400/25"
+                : "bg-red-500/15 border-red-400/25"
+            }`}>
+              <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${profitable ? "text-emerald-400" : "text-red-400"}`}>
+                {profitable ? "Live Profit" : "Loss"}
+              </p>
+              <p className={`text-3xl font-black tabular-nums mt-1 ${profitable ? "text-emerald-300" : "text-red-300"}`}>
+                {profitable
+                  ? aed(profit)
+                  : `−AED ${Math.abs(profit).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`}
+              </p>
+              <div className="flex gap-3 mt-2">
+                <span className={`text-sm font-bold tabular-nums ${profitable ? "text-emerald-400" : "text-red-400"}`}>
+                  ROI {pct(roi)}
+                </span>
+                <span className="text-white/20 font-bold">·</span>
+                <span className={`text-sm font-bold tabular-nums ${profitable ? "text-emerald-400" : "text-red-400"}`}>
+                  Cash-on-Cash {pct(mortgageRoiPct)}
+                </span>
               </div>
             </div>
           )}
+        </div>
+      </div>
 
-          {/* Auto-computed fees */}
-          <div className="flex flex-col gap-2 bg-muted/40 rounded-lg px-3 py-2.5">
-            {([
-              { key: "agencyFee",   label: "Agency Fee",    sub: showAdvanced ? "2% + 5% VAT (actual)" : "2% + 5% VAT",       val: agencyFee,   ovr: agencyFeeOvr,   setOvr: setAgencyFeeOvr },
-              { key: "dldFee",      label: "DLD Fee",       sub: showAdvanced && mouPrice ? "4% of MOU price" : "4%",           val: dldFee,      ovr: dldFeeOvr,      setOvr: setDldFeeOvr },
-              { key: "trusteeFee",  label: "Trustee Fee",   sub: "flat",                                                        val: trusteeFee,  ovr: trusteeFeeOvr,  setOvr: setTrusteeFeeOvr },
-              { key: "mortgageReg", label: "Mortgage Reg.", sub: showAdvanced && bankValuation ? "0.25% of bank val. loan" : "0.25% of loan", val: mortgageReg, ovr: mortgageRegOvr, setOvr: setMortgageRegOvr },
-            ] as const).map(({ key, label, sub, val, ovr, setOvr }) => (
-              <EditableAutoRow
-                key={key}
-                label={label}
-                sub={sub}
-                value={ovr !== null ? ovr : val.toFixed(2)}
-                onChange={v => setOvr(v)}
-                isEditing={!!editing[key]}
-                onEdit={() => {
-                  setEditing(e => ({ ...e, [key]: true }));
-                  if (ovr === null) setOvr(val.toFixed(2));
-                }}
-                onDone={() => setEditing(e => ({ ...e, [key]: false }))}
-                onReset={() => setOvr(null)}
-                isOverridden={ovr !== null}
+      {/* ── CONTENT ── */}
+      <div className="flex flex-col gap-3 px-4 -mt-4 max-w-md mx-auto">
+
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* Card: Property Details                                  */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-sm overflow-hidden">
+
+          {/* Property name */}
+          <div className="px-4 pt-5 pb-3">
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Property name — e.g. Maple 89, Unit 4B"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+            />
+          </div>
+
+          {/* Actual Price — big */}
+          <div className="px-4 pb-4">
+            <label className="block text-[10px] font-black tracking-[0.18em] text-muted-foreground uppercase mb-2">Actual Price</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground select-none">AED</span>
+              <NumberInput
+                value={propertyPrice}
+                onChange={setPropertyPrice}
+                placeholder="0"
+                className="w-full rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 pl-16 pr-4 py-4 text-2xl font-black text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary dark:focus:border-primary transition"
               />
-            ))}
+            </div>
+          </div>
 
-            <div className="h-px bg-border" />
+          {/* Advanced pricing toggle */}
+          <div className="px-4 pb-4">
+            <button type="button"
+              onClick={() => setShowAdvanced(v => !v)}
+              className="flex items-center gap-2 text-xs font-bold text-primary active:opacity-70 transition">
+              <svg className={`w-3.5 h-3.5 transition-transform duration-200 ${showAdvanced ? "rotate-90" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
+              {showAdvanced ? "Hide advanced pricing" : "Different MOU / bank valuation?"}
+            </button>
 
-            {/* Editable preset fees */}
-            {([
-              { key: "bankProc",   label: "Bank Processing", value: bankProcFee,  set: setBankProcFee },
-              { key: "valuation",  label: "Valuation Fee",   value: valuationFee, set: setValuationFee },
-              { key: "noc",        label: "NOC Fee",          value: nocFee,       set: setNocFee },
-              { key: "serviceFee", label: "Service Fee Prov.",value: serviceFee,   set: setServiceFee },
-            ] as const).map(({ key, label, value, set }) => (
-              <EditableAutoRow
-                key={key}
-                label={label}
-                value={value}
-                onChange={set}
-                isEditing={!!editing[key]}
-                onEdit={() => setEditing(e => ({ ...e, [key]: true }))}
-                onDone={() => setEditing(e => ({ ...e, [key]: false }))}
-              />
-            ))}
+            {/* Advanced panel */}
+            {showAdvanced && (
+              <div className="mt-3 rounded-2xl border-2 border-amber-200 dark:border-amber-700/40 bg-amber-50 dark:bg-amber-950/20 p-4 flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-amber-400/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-3 h-3 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700 dark:text-amber-400">Advanced Pricing</p>
+                </div>
 
-            <div className="border-t border-border pt-1.5 flex items-center justify-between">
-              <span className="text-sm font-bold text-foreground">Total Acquisition</span>
-              <span className={`text-sm font-bold tabular-nums ${propPrice > 0 ? "text-foreground" : "text-muted-foreground"}`}>{aed(acqTotal)}</span>
+                {/* MOU Price */}
+                <div>
+                  <label className="text-[11px] font-bold text-amber-700 dark:text-amber-400 block mb-1.5">MOU Price</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600/60 text-xs font-bold select-none">AED</span>
+                    <NumberInput value={mouPrice} onChange={setMouPrice} placeholder="4,990,000"
+                      className="w-full rounded-xl border border-amber-200 dark:border-amber-700/40 bg-white dark:bg-amber-950/30 pl-12 pr-3 py-2.5 text-sm font-semibold text-foreground placeholder:text-amber-300/60 focus:outline-none focus:ring-2 focus:ring-amber-400 transition" />
+                  </div>
+                  <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-1">DLD 4% fee billed on this</p>
+                </div>
+
+                {/* Bank Valuation */}
+                <div>
+                  <label className="text-[11px] font-bold text-amber-700 dark:text-amber-400 block mb-1.5">Bank Valuation</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600/60 text-xs font-bold select-none">AED</span>
+                    <NumberInput value={bankValuation} onChange={setBankValuation} placeholder="4,950,000"
+                      className="w-full rounded-xl border border-amber-200 dark:border-amber-700/40 bg-white dark:bg-amber-950/30 pl-12 pr-3 py-2.5 text-sm font-semibold text-foreground placeholder:text-amber-300/60 focus:outline-none focus:ring-2 focus:ring-amber-400 transition" />
+                  </div>
+                  <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-1">Down payment & mortgage reg basis</p>
+                </div>
+
+                {/* Gap Payment */}
+                <div>
+                  <label className="text-[11px] font-bold text-amber-700 dark:text-amber-400 block mb-1">Gap Payment</label>
+                  <EditableAutoRow
+                    label=""
+                    sub="actual − bank val"
+                    value={gapPaymentOvr !== null ? gapPaymentOvr : gapPaymentCalc.toFixed(2)}
+                    onChange={v => setGapPaymentOvr(v)}
+                    isEditing={!!editing["gapPayment"]}
+                    onEdit={() => {
+                      setEditing(e => ({ ...e, gapPayment: true }));
+                      if (gapPaymentOvr === null) setGapPaymentOvr(gapPaymentCalc.toFixed(2));
+                    }}
+                    onDone={() => setEditing(e => ({ ...e, gapPayment: false }))}
+                    onReset={() => setGapPaymentOvr(null)}
+                    isOverridden={gapPaymentOvr !== null}
+                  />
+                  <p className="text-[10px] text-amber-600 dark:text-amber-500">Cash above bank val paid to seller</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Acquisition Fees */}
+          <div className="border-t border-slate-100 dark:border-slate-700/60">
+            <div className="px-4 pt-4 pb-2">
+              <SectionLabel>Acquisition Fees</SectionLabel>
+            </div>
+
+            <div className="px-4 pb-4">
+              {/* Auto-computed fees */}
+              {([
+                { key: "agencyFee",   label: "Agency Fee",    sub: showAdvanced ? "2% + 5% VAT (actual)" : "2% + 5% VAT",                                     val: agencyFee,   ovr: agencyFeeOvr,   setOvr: setAgencyFeeOvr },
+                { key: "dldFee",      label: "DLD Fee",       sub: showAdvanced && mouPrice ? "4% of MOU price" : "4%",                                         val: dldFee,      ovr: dldFeeOvr,      setOvr: setDldFeeOvr },
+                { key: "trusteeFee",  label: "Trustee Fee",   sub: "flat",                                                                                      val: trusteeFee,  ovr: trusteeFeeOvr,  setOvr: setTrusteeFeeOvr },
+                { key: "mortgageReg", label: "Mortgage Reg.", sub: showAdvanced && bankValuation ? "0.25% of bank val. loan" : "0.25% of loan",                  val: mortgageReg, ovr: mortgageRegOvr, setOvr: setMortgageRegOvr },
+              ] as const).map(({ key, label, sub, val, ovr, setOvr }) => (
+                <EditableAutoRow
+                  key={key}
+                  label={label}
+                  sub={sub}
+                  value={ovr !== null ? ovr : val.toFixed(2)}
+                  onChange={v => setOvr(v)}
+                  isEditing={!!editing[key]}
+                  onEdit={() => {
+                    setEditing(e => ({ ...e, [key]: true }));
+                    if (ovr === null) setOvr(val.toFixed(2));
+                  }}
+                  onDone={() => setEditing(e => ({ ...e, [key]: false }))}
+                  onReset={() => setOvr(null)}
+                  isOverridden={ovr !== null}
+                />
+              ))}
+
+              <div className="h-px bg-slate-100 dark:bg-slate-700/60 my-1" />
+
+              {/* Preset fees */}
+              {([
+                { key: "bankProc",   label: "Bank Processing",   value: bankProcFee,  set: setBankProcFee },
+                { key: "valuation",  label: "Valuation Fee",     value: valuationFee, set: setValuationFee },
+                { key: "noc",        label: "NOC Fee",            value: nocFee,       set: setNocFee },
+                { key: "serviceFee", label: "Service Fee Prov.",  value: serviceFee,   set: setServiceFee },
+              ] as const).map(({ key, label, value, set }) => (
+                <EditableAutoRow
+                  key={key}
+                  label={label}
+                  value={value}
+                  onChange={set}
+                  isEditing={!!editing[key]}
+                  onEdit={() => setEditing(e => ({ ...e, [key]: true }))}
+                  onDone={() => setEditing(e => ({ ...e, [key]: false }))}
+                />
+              ))}
+
+              {/* Total Acquisition */}
+              <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-700/40 px-4 py-3 border border-slate-200/60 dark:border-slate-600/40">
+                <span className="text-sm font-bold text-foreground">Total Acquisition</span>
+                <span className={`text-base font-black tabular-nums ${propPrice > 0 ? "text-foreground" : "text-muted-foreground"}`}>{aed(acqTotal)}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="h-px bg-border" />
-
-        {/* ── Renovation Costs ── */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-foreground">Renovation Costs</label>
-            {renoTotal > 0 && <span className="text-xs font-semibold text-primary tabular-nums">{aed(renoTotal)}</span>}
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* Card: Renovation Costs                                  */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <SectionLabel>Renovation Costs</SectionLabel>
+            {renoTotal > 0 && (
+              <span className="text-xs font-bold text-primary tabular-nums bg-primary/10 px-2.5 py-1 rounded-full">
+                {aed(renoTotal)}
+              </span>
+            )}
           </div>
-          {renoItems.map((item, idx) => (
-            <div key={item.id} className="flex gap-2 items-center">
-              <input
-                type="text"
-                value={item.label}
-                onChange={e => updateRenoItem(item.id, { label: e.target.value })}
-                placeholder={`Item ${idx + 1}`}
-                className="w-28 shrink-0 rounded-lg border border-input bg-background px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-              />
-              <AEDRowInput value={item.amount} onChange={v => updateRenoItem(item.id, { amount: v })} />
-              <ScanButton scanning={item.scanning} onClick={() => fileInputRefs.current[item.id]?.click()} />
-              <input ref={el => { fileInputRefs.current[item.id] = el; }} type="file" accept="image/*" capture="environment" className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) handleScan(item.id, f); e.target.value = ""; }} />
-              {renoItems.length > 1 && (
-                <button type="button" onClick={() => removeRenoItem(item.id)}
-                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive active:opacity-70 transition">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          ))}
+
+          <div className="flex flex-col gap-2">
+            {renoItems.map((item, idx) => (
+              <div key={item.id} className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={item.label}
+                  onChange={e => updateRenoItem(item.id, { label: e.target.value })}
+                  placeholder={`Item ${idx + 1}`}
+                  className="w-24 shrink-0 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+                />
+                <AEDRowInput value={item.amount} onChange={v => updateRenoItem(item.id, { amount: v })} />
+                <ScanButton scanning={item.scanning} onClick={() => fileInputRefs.current[item.id]?.click()} />
+                <input
+                  ref={el => { fileInputRefs.current[item.id] = el; }}
+                  type="file" accept="image/*" capture="environment" className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleScan(item.id, f); e.target.value = ""; }}
+                />
+                {renoItems.length > 1 && (
+                  <button type="button" onClick={() => removeRenoItem(item.id)}
+                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-destructive active:opacity-70 transition">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
           <button type="button" onClick={() => setRenoItems(prev => [...prev, newCostItem()])}
-            className="flex items-center gap-1.5 text-sm text-primary font-medium py-1 active:opacity-70 transition">
+            className="mt-3 flex items-center gap-1.5 text-sm text-primary font-bold py-1 active:opacity-70 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
             </svg>
             Add cost item
           </button>
         </div>
 
-        {/* Total Cost */}
-        {hasCosts && (
-          <div className="flex items-center justify-between rounded-lg bg-muted/60 px-4 py-2.5">
-            <span className="text-sm text-muted-foreground font-medium">Total Cost</span>
-            <span className="text-sm font-bold text-foreground tabular-nums">{aed(totalCost)}</span>
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* Card: Sale Price + Save                                 */}
+        {/* ─────────────────────────────────────────────────────── */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-sm p-4">
+
+          {hasCosts && (
+            <div className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200/60 dark:border-slate-600/40 px-4 py-2.5 mb-4">
+              <span className="text-xs font-semibold text-muted-foreground">Total Cost</span>
+              <span className="text-sm font-black text-foreground tabular-nums">{aed(totalCost)}</span>
+            </div>
+          )}
+
+          <label className="block text-[10px] font-black tracking-[0.18em] text-muted-foreground uppercase mb-2">Sale Price</label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground select-none">AED</span>
+            <NumberInput
+              value={salePrice}
+              onChange={setSalePrice}
+              placeholder="0"
+              className="w-full rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 pl-16 pr-4 py-4 text-2xl font-black text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary transition"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5 mb-4">Target selling price</p>
+
+          <button type="button" onClick={handleSave} disabled={createItem.isPending}
+            className="w-full bg-primary text-primary-foreground rounded-2xl py-4 text-sm font-black tracking-wide active:opacity-90 transition disabled:opacity-50 shadow-lg shadow-primary/20">
+            {createItem.isPending ? "Saving…" : "Save Property"}
+          </button>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* Results Card — gradient hero                            */}
+        {/* ─────────────────────────────────────────────────────── */}
+        {hasBoth && (
+          <div className="rounded-2xl overflow-hidden shadow-xl">
+
+            {/* Main gradient */}
+            <div className={`px-5 py-6 ${profitable
+              ? "bg-gradient-to-br from-emerald-500 via-emerald-500 to-emerald-600"
+              : "bg-gradient-to-br from-red-500 via-red-500 to-red-600"}`}>
+              <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em]">
+                {profitable ? "Your Profit" : "Your Loss"}
+              </p>
+              <p className="text-4xl font-black text-white tabular-nums mt-1 leading-none">
+                {profitable
+                  ? aed(profit)
+                  : `−AED ${Math.abs(profit).toLocaleString("en-AE", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+              </p>
+
+              {/* ROI metrics */}
+              <div className="flex gap-2 mt-5">
+                <div className="flex-1 bg-black/15 rounded-xl p-3">
+                  <p className="text-white/60 text-[9px] font-black uppercase tracking-widest">Total ROI</p>
+                  <p className="text-white text-xl font-black tabular-nums mt-1">{pct(roi)}</p>
+                  <p className="text-white/40 text-[10px] mt-0.5 tabular-nums">of {aed(totalCost)}</p>
+                </div>
+                <div className="flex-1 bg-black/15 rounded-xl p-3">
+                  <p className="text-white/60 text-[9px] font-black uppercase tracking-widest">Cash-on-Cash</p>
+                  <p className="text-white text-xl font-black tabular-nums mt-1">{pct(mortgageRoiPct)}</p>
+                  <p className="text-white/40 text-[10px] mt-0.5 tabular-nums">of {aed(cashOut)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer strip */}
+            <div className={`flex px-5 py-3 ${profitable ? "bg-emerald-700" : "bg-red-700"}`}>
+              <div className="flex-1">
+                <p className="text-white/50 text-[9px] font-black uppercase tracking-widest">Sale Price</p>
+                <p className="text-white text-sm font-black tabular-nums mt-0.5">{aed(sale)}</p>
+              </div>
+              <div className="w-px bg-white/20 mx-4" />
+              <div className="flex-1">
+                <p className="text-white/50 text-[9px] font-black uppercase tracking-widest">Total Cost</p>
+                <p className="text-white text-sm font-black tabular-nums mt-0.5">{aed(totalCost)}</p>
+              </div>
+              <div className="w-px bg-white/20 mx-4" />
+              <div className="flex-1">
+                <p className="text-white/50 text-[9px] font-black uppercase tracking-widest">Margin</p>
+                <p className="text-white text-sm font-black tabular-nums mt-0.5">{pct(margin)}</p>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Sale Price */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-foreground">Sale Price</label>
-          <AEDInput value={salePrice} onChange={setSalePrice} placeholder="0" />
-          <p className="text-xs text-muted-foreground">Target selling price</p>
-        </div>
-      </div>
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* Price Targets                                           */}
+        {/* ─────────────────────────────────────────────────────── */}
+        {hasCosts && (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-sm p-4">
+            <SectionLabel>Price Targets</SectionLabel>
 
-      {/* ── Results ── */}
-      {hasBoth && (
-        <div className={`rounded-xl border p-4 shadow-sm flex flex-col gap-4 ${profitable ? "bg-card border-card-border" : "bg-destructive/5 border-destructive/30"}`}>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Results</p>
+            <div className="flex flex-col gap-2 mt-3">
+              {TIERS.map(tier => {
+                const tierPrice      = totalCost + tier.targetProfit;
+                const tierProfit     = tier.targetProfit;
+                const tierProfitPct  = totalCost ? (tierProfit / totalCost) * 100 : 0;
+                const isActive       = activeTier === tier.label;
+                const displayProfit    = isActive ? profit    : tierProfit;
+                const displayProfitPct = isActive ? profitPct : tierProfitPct;
+                const displayPositive  = displayProfit > 0;
 
-          {/* Profit headline */}
-          <div className="flex items-baseline justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground mb-0.5">Your Profit</p>
-              <p className={`text-3xl font-bold tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
-                {profitable
-                  ? aed(profit)
-                  : `−AED ${Math.abs(profit).toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-muted-foreground mb-0.5">Sale Price</p>
-              <p className="text-sm font-semibold text-foreground tabular-nums">{aed(sale)}</p>
-            </div>
-          </div>
-
-          <div className="h-px bg-border" />
-
-          {/* Return on total investment */}
-          <div className={`rounded-xl p-3.5 ${profitable ? "bg-primary/8" : "bg-destructive/8"}`}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">Total Investment Return</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Profit ÷ everything you spent</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Total cost: <span className="font-medium text-foreground tabular-nums">{aed(totalCost)}</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">(property + all fees + renovation)</p>
-              </div>
-              <div className="flex flex-col items-end gap-0.5 shrink-0">
-                <span className={`text-lg font-bold tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
-                  {profitable ? aed(profit) : `−AED ${Math.abs(profit).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`}
-                </span>
-                <span className={`text-sm font-semibold tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
-                  {pct(roi)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Return on cash out of pocket */}
-          <div className={`rounded-xl p-3.5 ${profitable ? "bg-blue-50 dark:bg-blue-950/30" : "bg-destructive/8"}`}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">Cash-on-Cash Return</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Profit ÷ your actual cash out of pocket</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Cash invested: <span className="font-medium text-foreground tabular-nums">{aed(cashOut)}</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">(down payment{gapPaymentN > 0 ? " + gap payment" : ""} + fees + renovation)</p>
-              </div>
-              <div className="flex flex-col items-end gap-0.5 shrink-0">
-                <span className={`text-lg font-bold tabular-nums ${profitable ? "text-blue-600 dark:text-blue-400" : "text-destructive"}`}>
-                  {profitable ? aed(profit) : `−AED ${Math.abs(profit).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`}
-                </span>
-                <span className={`text-sm font-semibold tabular-nums ${profitable ? "text-blue-600 dark:text-blue-400" : "text-destructive"}`}>
-                  {pct(mortgageRoiPct)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Price Targets ── */}
-      {hasCosts && (
-        <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Price Targets</p>
-          <div className="flex flex-col gap-2">
-            {TIERS.map(tier => {
-              const tierPrice     = totalCost + tier.targetProfit;
-              const tierProfit    = tier.targetProfit;
-              const tierProfitPct = totalCost ? (tierProfit / totalCost) * 100 : 0;
-              const isActive      = activeTier === tier.label;
-
-              // When this tier is active, show the user's real profit, not the fixed threshold
-              const displayProfit    = isActive ? profit    : tierProfit;
-              const displayProfitPct = isActive ? profitPct : tierProfitPct;
-              const displayPositive  = displayProfit > 0;
-
-              return (
-                <button key={tier.label} onClick={() => setSalePrice(tierPrice.toString())}
-                  className={`w-full flex items-center justify-between rounded-xl px-4 py-3 border-2 transition active:opacity-80
-                    ${isActive
-                      ? `${tier.activeBg} border-current ${tier.ring} ring-2 shadow-sm`
-                      : `${tier.bg} border-transparent`}`}>
-                  <div className="flex flex-col items-start gap-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm font-bold ${isActive ? tier.activeColor : tier.color}`}>{tier.label}</span>
-                      {isActive && (
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tier.activeBg} ${tier.activeColor} border border-current`}>
-                          YOUR PRICE
+                return (
+                  <button key={tier.label} onClick={() => setSalePrice(tierPrice.toString())}
+                    className={`w-full flex items-center justify-between rounded-xl px-4 py-3.5 border-2 transition active:opacity-80
+                      ${isActive
+                        ? `${tier.activeBg} border-current ${tier.ring} ring-2 shadow-sm`
+                        : `${tier.bg} border-transparent`}`}>
+                    <div className="flex flex-col items-start gap-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-black ${isActive ? tier.activeColor : tier.color}`}>{tier.label}</span>
+                        {isActive && (
+                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${tier.activeBg} ${tier.activeColor} border border-current`}>
+                            YOUR PRICE
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {isActive ? `Selling at ${aed(sale)}` : `Sell at ${aed(tierPrice)}`}
+                      </span>
+                      {isActive && tier.targetProfit > 0 && (
+                        <span className={`text-[10px] ${tier.color} opacity-70`}>
+                          {tier.label === "Ambitious" ? "800K+ target" : `${tier.targetProfit >= 1_000_000 ? (tier.targetProfit / 1_000_000).toFixed(1) + "M" : (tier.targetProfit / 1_000) + "K"}+ target`}
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {isActive
-                        ? `Selling at ${aed(sale)}`
-                        : `Sell at ${aed(tierPrice)}`}
-                    </span>
-                    {/* Show the tier threshold as a note when active */}
-                    {isActive && tier.targetProfit > 0 && (
-                      <span className={`text-[11px] ${tier.color} opacity-70`}>
-                        {tier.label === "Ambitious" ? "800K+ target" : `${tier.targetProfit >= 1_000_000 ? (tier.targetProfit / 1_000_000).toFixed(1) + "M" : (tier.targetProfit / 1_000) + "K"}+ target`}
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className={`text-sm font-black tabular-nums ${displayPositive ? tier.color : "text-muted-foreground"}`}>
+                        {displayPositive
+                          ? `+AED ${displayProfit.toLocaleString("en-AE", { maximumFractionDigits: 0 })}`
+                          : displayProfit === 0 ? "AED 0" : `−AED ${Math.abs(displayProfit).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`}
                       </span>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-0.5">
-                    <span className={`text-sm font-bold tabular-nums ${displayPositive ? tier.color : "text-muted-foreground"}`}>
-                      {displayPositive
-                        ? `+AED ${displayProfit.toLocaleString("en-AE", { maximumFractionDigits: 0 })}`
-                        : displayProfit === 0 ? "AED 0" : `−AED ${Math.abs(displayProfit).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`}
-                    </span>
-                    <span className={`text-xs font-semibold tabular-nums ${displayPositive ? tier.color : "text-muted-foreground"}`}>
-                      {displayPositive ? `+${pct(displayProfitPct)}` : `${pct(displayProfitPct)}`}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
+                      <span className={`text-xs font-bold tabular-nums ${displayPositive ? tier.color : "text-muted-foreground"}`}>
+                        {displayPositive ? `+${pct(displayProfitPct)}` : pct(displayProfitPct)}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {!activeTier && hasBoth && (
+              <p className="text-xs text-destructive mt-3 text-center font-bold">Below breakeven — selling at a loss</p>
+            )}
+            {!hasBoth && (
+              <p className="text-xs text-muted-foreground mt-3 text-center">Enter a sale price to see your tier</p>
+            )}
           </div>
-          {!activeTier && hasBoth && (
-            <p className="text-xs text-destructive mt-2 text-center font-medium">Below breakeven — selling at a loss</p>
-          )}
-          {!hasBoth && (
-            <p className="text-xs text-muted-foreground mt-2 text-center">Enter a sale price to see your tier</p>
-          )}
-        </div>
-      )}
+        )}
 
-      {/* ── Cash Out of Pocket ── */}
-      {hasCosts && (
-        <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm flex flex-col gap-4">
+        {/* ─────────────────────────────────────────────────────── */}
+        {/* Cash Out of Pocket                                      */}
+        {/* ─────────────────────────────────────────────────────── */}
+        {hasCosts && (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-sm overflow-hidden">
 
-          {/* Header + down payment % */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Your Cash Out of Pocket</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Every dirham you actually spend</p>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">Down</span>
-              <input type="number" inputMode="decimal" value={downPct} onChange={e => setDownPct(e.target.value)}
-                min={1} max={100}
-                className="w-14 rounded-lg border border-input bg-background px-2 py-1 text-sm text-center text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" />
-              <span className="text-xs text-muted-foreground">%</span>
-            </div>
-          </div>
-
-          {/* Bank portion note */}
-          {propPrice > 0 && (
-            <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-xs">
-              <span className="text-muted-foreground">Bank finances (mortgage)</span>
-              <span className="font-semibold text-foreground tabular-nums">{aed(loanAmount)}</span>
-            </div>
-          )}
-
-          {/* Itemized breakdown */}
-          <div className="flex flex-col gap-0">
-
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Your share — item by item</p>
-
-            {/* Down payment */}
-            <div className="flex justify-between items-center py-2 border-b border-border/60">
+            {/* Header */}
+            <div className="px-4 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60">
               <div>
-                <p className="text-sm text-foreground font-medium">Down Payment</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {Math.round(downFrac * 100)}% of {showAdvanced && bankValuation ? "bank valuation" : "property price"}
-                </p>
+                <SectionLabel>Cash Out of Pocket</SectionLabel>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Every dirham you personally spend</p>
               </div>
-              <span className="text-sm font-semibold text-foreground tabular-nums">{aed(downPayment)}</span>
+              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700/40 border border-slate-200/60 dark:border-slate-600/40 rounded-xl px-3 py-2">
+                <input
+                  type="number" inputMode="decimal" value={downPct}
+                  onChange={e => setDownPct(e.target.value)} min={1} max={100}
+                  className="w-9 text-center text-sm font-black text-foreground bg-transparent focus:outline-none"
+                />
+                <span className="text-xs font-bold text-muted-foreground">% down</span>
+              </div>
             </div>
 
-            {/* Gap payment (advanced mode only) */}
-            {gapPaymentN > 0 && (
-              <div className="flex justify-between items-center py-2 border-b border-border/60">
-                <div>
-                  <p className="text-sm text-foreground font-medium">Gap Payment</p>
-                  <p className="text-[11px] text-muted-foreground">extra cash to seller (actual − bank val)</p>
+            {/* Bank mortgage note */}
+            {propPrice > 0 && (
+              <div className="mx-4 mt-4 flex items-center justify-between rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-800/30 px-4 py-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-400" />
+                  <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">Bank finances (mortgage)</span>
                 </div>
-                <span className="text-sm font-semibold text-foreground tabular-nums">{aed(gapPaymentN)}</span>
+                <span className="text-sm font-black text-blue-700 dark:text-blue-400 tabular-nums">{aed(loanAmount)}</span>
               </div>
             )}
 
-            {/* Acquisition fees */}
-            {[
-              { label: "Agency Fee",     sub: "2% + 5% VAT",      val: agencyFee,   show: propPrice > 0 },
-              { label: "DLD Fee",        sub: "4% of price",       val: dldFee,      show: propPrice > 0 },
-              { label: "Trustee Fee",    sub: "flat DLD fee",      val: trusteeFee,  show: propPrice > 0 },
-              { label: "Mortgage Reg.", sub: "0.25% of loan",     val: mortgageReg, show: propPrice > 0 },
-              { label: "Bank Processing",sub: "bank charge",       val: n(bankProcFee),  show: n(bankProcFee) > 0 },
-              { label: "Valuation Fee",  sub: "bank valuation",    val: n(valuationFee), show: n(valuationFee) > 0 },
-              { label: "NOC Fee",        sub: "developer fee",     val: n(nocFee),       show: n(nocFee) > 0 },
-              { label: "Service Fee Prov.", sub: "maintenance est.", val: n(serviceFee), show: n(serviceFee) > 0 },
-            ].filter(r => r.show).map(({ label, sub, val }) => (
-              <div key={label} className="flex justify-between items-center py-2 border-b border-border/60">
-                <div>
-                  <p className="text-sm text-foreground">{label}</p>
-                  <p className="text-[11px] text-muted-foreground">{sub}</p>
-                </div>
-                <span className="text-sm font-medium text-foreground tabular-nums">{aed(val)}</span>
-              </div>
-            ))}
+            {/* Itemized rows */}
+            <div className="px-4 pt-4 pb-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">Your share — line by line</p>
 
-            {/* Renovation items */}
-            {renoItems.filter(i => n(i.amount) > 0).map(item => (
-              <div key={item.id} className="flex justify-between items-center py-2 border-b border-border/60">
+              {/* Down payment */}
+              <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/50">
                 <div>
-                  <p className="text-sm text-foreground">{item.label || "Renovation item"}</p>
-                  <p className="text-[11px] text-muted-foreground">renovation cost</p>
+                  <p className="text-sm font-semibold text-foreground">Down Payment</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {Math.round(downFrac * 100)}% of {showAdvanced && bankValuation ? "bank valuation" : "property price"}
+                  </p>
                 </div>
-                <span className="text-sm font-medium text-foreground tabular-nums">{aed(n(item.amount))}</span>
+                <span className="text-sm font-bold text-foreground tabular-nums">{aed(downPayment)}</span>
               </div>
-            ))}
 
-            {/* Total */}
-            <div className="flex justify-between items-center pt-3 mt-1">
+              {/* Gap payment */}
+              {gapPaymentN > 0 && (
+                <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/50">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Gap Payment</p>
+                    <p className="text-[11px] text-muted-foreground">extra cash to seller (actual − bank val)</p>
+                  </div>
+                  <span className="text-sm font-bold text-foreground tabular-nums">{aed(gapPaymentN)}</span>
+                </div>
+              )}
+
+              {/* Acquisition fees */}
+              {[
+                { label: "Agency Fee",        sub: "2% + 5% VAT",       val: agencyFee,       show: propPrice > 0 },
+                { label: "DLD Fee",           sub: "4% of price",        val: dldFee,          show: propPrice > 0 },
+                { label: "Trustee Fee",       sub: "flat DLD fee",       val: trusteeFee,      show: propPrice > 0 },
+                { label: "Mortgage Reg.",     sub: "0.25% of loan",      val: mortgageReg,     show: propPrice > 0 },
+                { label: "Bank Processing",   sub: "bank charge",        val: n(bankProcFee),  show: n(bankProcFee) > 0 },
+                { label: "Valuation Fee",     sub: "bank valuation",     val: n(valuationFee), show: n(valuationFee) > 0 },
+                { label: "NOC Fee",           sub: "developer fee",      val: n(nocFee),       show: n(nocFee) > 0 },
+                { label: "Service Fee Prov.", sub: "maintenance est.",   val: n(serviceFee),   show: n(serviceFee) > 0 },
+              ].filter(r => r.show).map(({ label, sub, val }) => (
+                <div key={label} className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/50">
+                  <div>
+                    <p className="text-sm text-foreground">{label}</p>
+                    <p className="text-[11px] text-muted-foreground">{sub}</p>
+                  </div>
+                  <span className="text-sm font-medium text-foreground tabular-nums">{aed(val)}</span>
+                </div>
+              ))}
+
+              {/* Renovation items */}
+              {renoItems.filter(i => n(i.amount) > 0).map(item => (
+                <div key={item.id} className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/50">
+                  <div>
+                    <p className="text-sm text-foreground">{item.label || "Renovation item"}</p>
+                    <p className="text-[11px] text-muted-foreground">renovation cost</p>
+                  </div>
+                  <span className="text-sm font-medium text-foreground tabular-nums">{aed(n(item.amount))}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Total row — dark */}
+            <div className="mx-4 mb-4 flex items-center justify-between rounded-2xl bg-slate-900 dark:bg-white/8 px-5 py-4">
               <div>
-                <p className="text-base font-bold text-foreground">Total Out of Pocket</p>
-                <p className="text-[11px] text-muted-foreground">What you actually spend</p>
+                <p className="text-white/60 text-[10px] font-black uppercase tracking-widest">Total Out of Pocket</p>
+                <p className="text-[11px] text-white/40 mt-0.5">What you personally spend</p>
               </div>
-              <span className="text-base font-bold text-foreground tabular-nums">{aed(cashOut)}</span>
+              <span className="text-xl font-black text-white tabular-nums">{aed(cashOut)}</span>
             </div>
+
+            {/* Return on cash */}
+            {hasBoth && cashOut > 0 && (
+              <div className={`mx-4 mb-4 rounded-2xl p-4 ${profitable ? "bg-primary/8" : "bg-destructive/8"}`}>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Return on Your Cash</p>
+                <div className="flex items-end justify-between mt-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-0.5">Profit</p>
+                    <p className={`text-2xl font-black tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
+                      {aedSigned(profit)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground mb-0.5">Cash-on-Cash</p>
+                    <p className={`text-2xl font-black tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
+                      {pct(mortgageRoiPct)}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Cash invested: <span className="font-bold text-foreground tabular-nums">{aed(cashOut)}</span>
+                  {" "}(down{gapPaymentN > 0 ? " + gap" : ""} + fees + reno)
+                </p>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Result */}
-          {hasBoth && cashOut > 0 ? (
-            <div className={`rounded-xl p-4 flex flex-col gap-3 ${profitable ? "bg-primary/8" : "bg-destructive/8"}`}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Return on Your Cash</p>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Profit</p>
-                  <p className={`text-2xl font-bold tabular-nums mt-0.5 ${profitable ? "text-primary" : "text-destructive"}`}>
-                    {aedSigned(profit)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">ROI on cash invested</p>
-                  <p className={`text-2xl font-bold tabular-nums mt-0.5 ${profitable ? "text-primary" : "text-destructive"}`}>
-                    {(mortgageRoiPct > 0 ? "+" : "") + pct(mortgageRoiPct)}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/60 pt-2 mt-1">
-                <span>Cash invested: <span className="font-semibold text-foreground tabular-nums">{aed(cashOut)}</span></span>
-                <span>Sale: <span className="font-semibold text-foreground tabular-nums">{aed(sale)}</span></span>
-              </div>
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground text-center">Enter a sale price above to see your return on cash</p>
-          )}
-        </div>
-      )}
-
-      {/* Save */}
-      <button onClick={handleSave}
-        disabled={createItem.isPending || !name.trim() || !propPrice || !sale}
-        className="w-full rounded-xl bg-primary text-primary-foreground font-semibold py-4 text-base shadow-sm active:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition">
-        {createItem.isPending ? "Saving..." : "Save Property"}
-      </button>
+      </div>
     </div>
   );
 }
