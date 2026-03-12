@@ -294,7 +294,9 @@ export default function Calculator() {
   const mortgageReg = mortgageRegOvr !== null ? n(mortgageRegOvr) : mortgageRegCalc;
 
   const manualAcq   = n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee);
-  const acqTotal    = propPrice + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
+  // Use MOU price as property base in advanced mode (gap added separately = actual price, no double count)
+  const propertyBase = showAdvanced && mouPrice ? mouPriceN : propPrice;
+  const acqTotal    = propertyBase + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
 
   // ── derived reno & totals ──────────────────────────────────────────────
   const renoTotal  = renoItems.reduce((s, i) => s + n(i.amount), 0);
@@ -310,8 +312,8 @@ export default function Calculator() {
   const activeTier = hasBoth ? getActiveTier(profit) : null;
 
   // ── mortgage return ────────────────────────────────────────────────────
-  const downPayment  = propPrice * downFrac;
-  const cashOut      = downPayment + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq + renoTotal;
+  const downPayment  = propertyBase * downFrac;
+  const cashOut      = downPayment + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq + renoTotal;
   const mortgageRoiPct = cashOut > 0 ? (profit / cashOut) * 100 : 0;
 
   // ── handlers ──────────────────────────────────────────────────────────
@@ -727,10 +729,23 @@ export default function Calculator() {
             <div className="flex justify-between items-center py-2 border-b border-border/60">
               <div>
                 <p className="text-sm text-foreground font-medium">Down Payment</p>
-                <p className="text-[11px] text-muted-foreground">{Math.round(downFrac * 100)}% of property price</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {Math.round(downFrac * 100)}% of {showAdvanced && mouPrice ? "MOU price" : "property price"}
+                </p>
               </div>
               <span className="text-sm font-semibold text-foreground tabular-nums">{aed(downPayment)}</span>
             </div>
+
+            {/* Gap payment (advanced mode only) */}
+            {gapPaymentN > 0 && (
+              <div className="flex justify-between items-center py-2 border-b border-border/60">
+                <div>
+                  <p className="text-sm text-foreground font-medium">Gap Payment</p>
+                  <p className="text-[11px] text-muted-foreground">extra cash to seller (actual − MOU)</p>
+                </div>
+                <span className="text-sm font-semibold text-foreground tabular-nums">{aed(gapPaymentN)}</span>
+              </div>
+            )}
 
             {/* Acquisition fees */}
             {[
