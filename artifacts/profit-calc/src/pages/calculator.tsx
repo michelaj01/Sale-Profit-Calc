@@ -425,6 +425,11 @@ export default function Calculator() {
               const tierProfitPct = totalCost ? (tierProfit / totalCost) * 100 : 0;
               const isActive      = activeTier === tier.label;
 
+              // When this tier is active, show the user's real profit, not the fixed threshold
+              const displayProfit    = isActive ? profit    : tierProfit;
+              const displayProfitPct = isActive ? profitPct : tierProfitPct;
+              const displayPositive  = displayProfit > 0;
+
               return (
                 <button key={tier.label} onClick={() => setSalePrice(tierPrice.toString())}
                   className={`w-full flex items-center justify-between rounded-xl px-4 py-3 border-2 transition active:opacity-80
@@ -440,14 +445,26 @@ export default function Calculator() {
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-muted-foreground">Sell at {aed(tierPrice)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {isActive
+                        ? `Selling at ${aed(sale)}`
+                        : `Sell at ${aed(tierPrice)}`}
+                    </span>
+                    {/* Show the tier threshold as a note when active */}
+                    {isActive && tier.targetProfit > 0 && (
+                      <span className={`text-[11px] ${tier.color} opacity-70`}>
+                        {tier.label === "Ambitious" ? "800K+ target" : `${tier.targetProfit >= 1_000_000 ? (tier.targetProfit / 1_000_000).toFixed(1) + "M" : (tier.targetProfit / 1_000) + "K"}+ target`}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
-                    <span className={`text-sm font-bold tabular-nums ${tier.targetProfit > 0 ? tier.color : "text-muted-foreground"}`}>
-                      {tier.targetProfit > 0 ? `+AED ${tierProfit.toLocaleString("en-AE", { maximumFractionDigits: 0 })}` : "AED 0"}
+                    <span className={`text-sm font-bold tabular-nums ${displayPositive ? tier.color : "text-muted-foreground"}`}>
+                      {displayPositive
+                        ? `+AED ${displayProfit.toLocaleString("en-AE", { maximumFractionDigits: 0 })}`
+                        : displayProfit === 0 ? "AED 0" : `−AED ${Math.abs(displayProfit).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`}
                     </span>
-                    <span className={`text-xs font-semibold tabular-nums ${tier.targetProfit > 0 ? tier.color : "text-muted-foreground"}`}>
-                      {tier.targetProfit > 0 ? `+${pct(tierProfitPct)}` : "0%"}
+                    <span className={`text-xs font-semibold tabular-nums ${displayPositive ? tier.color : "text-muted-foreground"}`}>
+                      {displayPositive ? `+${pct(displayProfitPct)}` : `${pct(displayProfitPct)}`}
                     </span>
                   </div>
                 </button>
