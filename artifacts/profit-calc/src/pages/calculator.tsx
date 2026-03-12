@@ -156,14 +156,17 @@ function ScanButton({ scanning, onClick }: { scanning: boolean; onClick: () => v
 // ─── editable preset row ───────────────────────────────────────────────────
 
 function EditableAutoRow({
-  label, value, onChange, isEditing, onEdit, onDone,
+  label, sub, value, onChange, isEditing, onEdit, onDone, onReset, isOverridden,
 }: {
   label: string;
+  sub?: string;
   value: string;
   onChange: (v: string) => void;
   isEditing: boolean;
   onEdit: () => void;
   onDone: () => void;
+  onReset?: () => void;
+  isOverridden?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -175,9 +178,18 @@ function EditableAutoRow({
   if (isEditing) {
     return (
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm text-foreground shrink-0">{label}</span>
+        <div className="flex items-baseline gap-1 shrink-0">
+          <span className="text-sm text-foreground">{label}</span>
+          {sub && <span className="text-[11px] text-muted-foreground">{sub}</span>}
+        </div>
         <div className="flex items-center gap-1.5">
-          <div className="relative w-36">
+          {onReset && (
+            <button type="button" onClick={() => { onReset(); onDone(); }}
+              className="text-[11px] text-primary font-semibold px-2 py-1 rounded-md bg-primary/10 active:opacity-70 transition whitespace-nowrap">
+              Reset auto
+            </button>
+          )}
+          <div className="relative w-32">
             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold select-none">AED</span>
             <input
               ref={inputRef}
@@ -202,7 +214,11 @@ function EditableAutoRow({
 
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-foreground">{label}</span>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-sm text-foreground">{label}</span>
+        {sub && !isOverridden && <span className="text-[11px] text-muted-foreground">{sub}</span>}
+        {isOverridden && <span className="text-[10px] font-semibold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-full">edited</span>}
+      </div>
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium tabular-nums text-foreground">
           {aed(parseFloat(value) || 0)}
@@ -230,7 +246,13 @@ export default function Calculator() {
   const [nocFee, setNocFee]               = useState(DEFAULTS.nocFee);
   const [serviceFee, setServiceFee]       = useState(DEFAULTS.serviceFee);
 
-  // Editing states for preset fees
+  // Override states for auto-computed fees (null = use formula)
+  const [agencyFeeOvr,   setAgencyFeeOvr]   = useState<string | null>(null);
+  const [dldFeeOvr,      setDldFeeOvr]      = useState<string | null>(null);
+  const [trusteeFeeOvr,  setTrusteeFeeOvr]  = useState<string | null>(null);
+  const [mortgageRegOvr, setMortgageRegOvr] = useState<string | null>(null);
+
+  // Editing states for all editable rows
   const [editing, setEditing] = useState<Record<string, boolean>>({});
 
   // Renovation
@@ -245,15 +267,22 @@ export default function Calculator() {
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // ── derived acquisition ────────────────────────────────────────────────
-  const propPrice    = n(propertyPrice);
-  const agencyFee    = propPrice * AGENCY_FEE_PCT * (1 + AGENCY_VAT_PCT);  // 2% + 5% VAT
-  const dldFee       = propPrice * DLD_FEE_PCT;
-  const trusteeFee   = propPrice > 0 ? TRUSTEE_FEE_FLAT : 0;
-  const downFrac     = Math.min(100, Math.max(0, parseFloat(downPct) || 20)) / 100;
-  const loanAmount   = propPrice * (1 - downFrac);
-  const mortgageReg  = loanAmount * MORTGAGE_REG_PCT;                       // 0.25% of loan
-  const manualAcq    = n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee);
-  const acqTotal     = propPrice + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
+  const propPrice       = n(propertyPrice);
+  const agencyFeeCalc   = propPrice * AGENCY_FEE_PCT * (1 + AGENCY_VAT_PCT);
+  const dldFeeCalc      = propPrice * DLD_FEE_PCT;
+  const trusteeFeeCalc  = propPrice > 0 ? TRUSTEE_FEE_FLAT : 0;
+  const downFrac        = Math.min(100, Math.max(0, parseFloat(downPct) || 20)) / 100;
+  const loanAmount      = propPrice * (1 - downFrac);
+  const mortgageRegCalc = loanAmount * MORTGAGE_REG_PCT;
+
+  // Use override if manually edited, otherwise use formula
+  const agencyFee   = agencyFeeOvr   !== null ? n(agencyFeeOvr)   : agencyFeeCalc;
+  const dldFee      = dldFeeOvr      !== null ? n(dldFeeOvr)      : dldFeeCalc;
+  const trusteeFee  = trusteeFeeOvr  !== null ? n(trusteeFeeOvr)  : trusteeFeeCalc;
+  const mortgageReg = mortgageRegOvr !== null ? n(mortgageRegOvr) : mortgageRegCalc;
+
+  const manualAcq   = n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee);
+  const acqTotal    = propPrice + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
 
   // ── derived reno & totals ──────────────────────────────────────────────
   const renoTotal  = renoItems.reduce((s, i) => s + n(i.amount), 0);
@@ -322,20 +351,6 @@ export default function Calculator() {
     setRenoItems([newCostItem()]); setSalePrice("");
   }
 
-  // ── auto row ──────────────────────────────────────────────────────────
-  function AutoRow({ label, sub, val }: { label: string; sub: string; val: number }) {
-    return (
-      <div className="flex items-center justify-between">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-sm text-foreground">{label}</span>
-          <span className="text-[11px] text-muted-foreground">{sub}</span>
-        </div>
-        <span className={`text-sm font-medium tabular-nums ${propPrice > 0 ? "text-foreground" : "text-muted-foreground"}`}>
-          {aed(val)}
-        </span>
-      </div>
-    );
-  }
 
   // ──────────────────────────────────────────────────────────────────────
   return (
@@ -375,10 +390,28 @@ export default function Calculator() {
 
           {/* Auto-computed fees */}
           <div className="flex flex-col gap-2 bg-muted/40 rounded-lg px-3 py-2.5">
-            <AutoRow label="Agency Fee" sub="2% + 5% VAT" val={agencyFee} />
-            <AutoRow label="DLD Fee"    sub="4%"           val={dldFee} />
-            <AutoRow label="Trustee Fee" sub="flat"        val={trusteeFee} />
-            <AutoRow label="Mortgage Reg." sub="0.25% of loan" val={mortgageReg} />
+            {([
+              { key: "agencyFee",   label: "Agency Fee",    sub: "2% + 5% VAT",   val: agencyFee,   ovr: agencyFeeOvr,   setOvr: setAgencyFeeOvr },
+              { key: "dldFee",      label: "DLD Fee",       sub: "4%",             val: dldFee,      ovr: dldFeeOvr,      setOvr: setDldFeeOvr },
+              { key: "trusteeFee",  label: "Trustee Fee",   sub: "flat",           val: trusteeFee,  ovr: trusteeFeeOvr,  setOvr: setTrusteeFeeOvr },
+              { key: "mortgageReg", label: "Mortgage Reg.", sub: "0.25% of loan",  val: mortgageReg, ovr: mortgageRegOvr, setOvr: setMortgageRegOvr },
+            ] as const).map(({ key, label, sub, val, ovr, setOvr }) => (
+              <EditableAutoRow
+                key={key}
+                label={label}
+                sub={sub}
+                value={ovr !== null ? ovr : val.toFixed(2)}
+                onChange={v => setOvr(v)}
+                isEditing={!!editing[key]}
+                onEdit={() => {
+                  setEditing(e => ({ ...e, [key]: true }));
+                  if (ovr === null) setOvr(val.toFixed(2));
+                }}
+                onDone={() => setEditing(e => ({ ...e, [key]: false }))}
+                onReset={() => setOvr(null)}
+                isOverridden={ovr !== null}
+              />
+            ))}
 
             <div className="h-px bg-border" />
 
