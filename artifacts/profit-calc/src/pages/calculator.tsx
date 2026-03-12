@@ -506,7 +506,9 @@ export default function Calculator() {
             <div>
               <p className="text-xs text-muted-foreground mb-0.5">Your Profit</p>
               <p className={`text-3xl font-bold tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
-                {aedSigned(profit)}
+                {profitable
+                  ? aed(profit)
+                  : `−AED ${Math.abs(profit).toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </p>
             </div>
             <div className="text-right">
@@ -528,9 +530,14 @@ export default function Calculator() {
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">(property + all fees + renovation)</p>
               </div>
-              <span className={`text-2xl font-bold tabular-nums shrink-0 ${profitable ? "text-primary" : "text-destructive"}`}>
-                {(profitable ? "+" : "") + pct(roi)}
-              </span>
+              <div className="flex flex-col items-end gap-0.5 shrink-0">
+                <span className={`text-lg font-bold tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
+                  {profitable ? aed(profit) : `−AED ${Math.abs(profit).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`}
+                </span>
+                <span className={`text-sm font-semibold tabular-nums ${profitable ? "text-primary" : "text-destructive"}`}>
+                  {pct(roi)}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -545,9 +552,14 @@ export default function Calculator() {
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">(down payment + fees + renovation)</p>
               </div>
-              <span className={`text-2xl font-bold tabular-nums shrink-0 ${profitable ? "text-blue-600 dark:text-blue-400" : "text-destructive"}`}>
-                {(mortgageRoiPct > 0 ? "+" : "") + pct(mortgageRoiPct)}
-              </span>
+              <div className="flex flex-col items-end gap-0.5 shrink-0">
+                <span className={`text-lg font-bold tabular-nums ${profitable ? "text-blue-600 dark:text-blue-400" : "text-destructive"}`}>
+                  {profitable ? aed(profit) : `−AED ${Math.abs(profit).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`}
+                </span>
+                <span className={`text-sm font-semibold tabular-nums ${profitable ? "text-blue-600 dark:text-blue-400" : "text-destructive"}`}>
+                  {pct(mortgageRoiPct)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
