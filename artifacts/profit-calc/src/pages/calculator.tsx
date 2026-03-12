@@ -40,6 +40,14 @@ const DLD_FEE_PCT      = 0.04;
 const TRUSTEE_FEE_FLAT = 4_200;
 const MORTGAGE_REG_PCT = 0.0025;
 
+// Default values for editable preset fees (typical Dubai market rates)
+const DEFAULTS = {
+  bankProcFee: "10395",
+  valuationFee: "3150",
+  nocFee: "1050",
+  serviceFee: "6000",
+} as const;
+
 const TIERS = [
   { label: "Breakeven",    minProfit: 0,       maxProfit: 300_000,  targetProfit: 0,       color: "text-slate-500",    activeColor: "text-slate-700", bg: "bg-slate-50 dark:bg-slate-800/40",   activeBg: "bg-slate-100 dark:bg-slate-800",   ring: "ring-slate-400",  desc: "Zero profit" },
   { label: "Conservative", minProfit: 300_000, maxProfit: 500_000,  targetProfit: 300_000, color: "text-blue-500",     activeColor: "text-blue-600",  bg: "bg-blue-50 dark:bg-blue-950/40",     activeBg: "bg-blue-100 dark:bg-blue-900/60",  ring: "ring-blue-500",   desc: "+AED 300K profit" },
@@ -145,6 +153,71 @@ function ScanButton({ scanning, onClick }: { scanning: boolean; onClick: () => v
   );
 }
 
+// ─── editable preset row ───────────────────────────────────────────────────
+
+function EditableAutoRow({
+  label, value, onChange, isEditing, onEdit, onDone,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  isEditing: boolean;
+  onEdit: () => void;
+  onDone: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function startEdit() {
+    onEdit();
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm text-foreground shrink-0">{label}</span>
+        <div className="flex items-center gap-1.5">
+          <div className="relative w-36">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold select-none">AED</span>
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="decimal"
+              value={fmtDisplay(value)}
+              onChange={e => onChange(stripCommas(e.target.value))}
+              onKeyDown={e => e.key === "Enter" && onDone()}
+              className="w-full rounded-md border border-primary bg-background pl-10 pr-2 py-1.5 text-sm text-right text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+            />
+          </div>
+          <button type="button" onClick={onDone}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground active:opacity-80 transition">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-foreground">{label}</span>
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium tabular-nums text-foreground">
+          {aed(parseFloat(value) || 0)}
+        </span>
+        <button type="button" onClick={startEdit}
+          className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground active:opacity-70 transition" title="Edit">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── main component ────────────────────────────────────────────────────────
 
 export default function Calculator() {
@@ -152,10 +225,13 @@ export default function Calculator() {
 
   // Acquisition inputs
   const [propertyPrice, setPropertyPrice] = useState("");
-  const [bankProcFee, setBankProcFee]     = useState("");
-  const [valuationFee, setValuationFee]   = useState("");
-  const [nocFee, setNocFee]               = useState("");
-  const [serviceFee, setServiceFee]       = useState("");
+  const [bankProcFee, setBankProcFee]     = useState(DEFAULTS.bankProcFee);
+  const [valuationFee, setValuationFee]   = useState(DEFAULTS.valuationFee);
+  const [nocFee, setNocFee]               = useState(DEFAULTS.nocFee);
+  const [serviceFee, setServiceFee]       = useState(DEFAULTS.serviceFee);
+
+  // Editing states for preset fees
+  const [editing, setEditing] = useState<Record<string, boolean>>({});
 
   // Renovation
   const [renoItems, setRenoItems] = useState<CostItem[]>([newCostItem()]);
@@ -261,25 +337,6 @@ export default function Calculator() {
     );
   }
 
-  function ManualRow({ label, sub, value, onChange }: { label: string; sub?: string; value: string; onChange: (v: string) => void }) {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="flex-1 flex items-baseline gap-1">
-          <span className="text-sm text-foreground whitespace-nowrap">{label}</span>
-          {sub && <span className="text-[11px] text-muted-foreground">{sub}</span>}
-        </div>
-        <div className="relative w-36">
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold select-none">AED</span>
-          <NumberInput
-            value={value}
-            onChange={onChange}
-            className="w-full rounded-md border border-input bg-background pl-10 pr-2 py-1.5 text-sm text-right text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-          />
-        </div>
-      </div>
-    );
-  }
-
   // ──────────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-5 p-4 max-w-md mx-auto pb-8">
@@ -325,11 +382,23 @@ export default function Calculator() {
 
             <div className="h-px bg-border" />
 
-            {/* Manual / variable fees */}
-            <ManualRow label="Bank Processing" value={bankProcFee} onChange={setBankProcFee} />
-            <ManualRow label="Valuation Fee"   value={valuationFee} onChange={setValuationFee} />
-            <ManualRow label="NOC Fee"         value={nocFee} onChange={setNocFee} />
-            <ManualRow label="Service Fee Prov." value={serviceFee} onChange={setServiceFee} />
+            {/* Editable preset fees */}
+            {([
+              { key: "bankProc",   label: "Bank Processing", value: bankProcFee,  set: setBankProcFee },
+              { key: "valuation",  label: "Valuation Fee",   value: valuationFee, set: setValuationFee },
+              { key: "noc",        label: "NOC Fee",          value: nocFee,       set: setNocFee },
+              { key: "serviceFee", label: "Service Fee Prov.",value: serviceFee,   set: setServiceFee },
+            ] as const).map(({ key, label, value, set }) => (
+              <EditableAutoRow
+                key={key}
+                label={label}
+                value={value}
+                onChange={set}
+                isEditing={!!editing[key]}
+                onEdit={() => setEditing(e => ({ ...e, [key]: true }))}
+                onDone={() => setEditing(e => ({ ...e, [key]: false }))}
+              />
+            ))}
 
             <div className="border-t border-border pt-1.5 flex items-center justify-between">
               <span className="text-sm font-bold text-foreground">Total Acquisition</span>
