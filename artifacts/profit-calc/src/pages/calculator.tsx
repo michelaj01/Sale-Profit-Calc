@@ -291,7 +291,7 @@ export default function Calculator() {
   const trusteeFee  = trusteeFeeOvr  !== null ? n(trusteeFeeOvr)  : trusteeFeeCalc;
   const mortgageReg = mortgageRegOvr !== null ? n(mortgageRegOvr) : mortgageRegCalc;
 
-  const manualAcq    = n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee);
+  const manualAcq    = propPrice > 0 ? n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee) : 0;
   const propertyBase = showAdvanced ? bankValN : propPrice;
   const acqTotal     = propertyBase + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
 
@@ -431,7 +431,7 @@ export default function Calculator() {
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Property name — e.g. Maple 89, Unit 4B"
+              placeholder="Property name"
               className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
             />
           </div>
