@@ -5,9 +5,6 @@
  * Profit Calculator API
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
 
 export interface Item {
   id: number;
@@ -18,20 +15,5 @@ export interface Item {
   profitMargin: number;
   roi: number;
   notes?: string | null;
-  createdAt: string;
-}
-
-export interface CreateItemRequest {
-  name: string;
-  acquisitionCost: number;
-  salePrice: number;
-  notes?: string | null;
-}
-
-export interface ErrorResponse {
-  error: string;
-}
-
-export interface DeleteResponse {
-  success: boolean;
+  createdAt: Date;
 }
