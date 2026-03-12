@@ -5,17 +5,18 @@
  * Profit Calculator API
  * OpenAPI spec version: 0.1.0
  */
+import type { CostItem } from "./costItem";
 
 export interface Item {
   id: number;
   name: string;
   acquisitionCost: number;
   renovationCost: number;
+  costItems: CostItem[];
   totalCost: number;
   salePrice: number;
   profit: number;
   profitMargin: number;
   roi: number;
-  notes?: string | null;
   createdAt: Date;
 }

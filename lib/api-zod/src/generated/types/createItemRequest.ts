@@ -5,11 +5,12 @@
  * Profit Calculator API
  * OpenAPI spec version: 0.1.0
  */
+import type { CostItem } from "./costItem";
 
 export interface CreateItemRequest {
   name: string;
   acquisitionCost: number;
   renovationCost?: number;
+  costItems?: CostItem[];
   salePrice: number;
-  notes?: string | null;
 }

@@ -20,6 +20,8 @@ import type {
   CreateItemRequest,
   DeleteResponse,
   ErrorResponse,
+  ExtractAmountRequest,
+  ExtractAmountResponse,
   HealthStatus,
   Item,
 } from "./api.schemas";
@@ -430,4 +432,90 @@ export const useDeleteItem = <
   TContext
 > => {
   return useMutation(getDeleteItemMutationOptions(options));
+};
+
+/**
+ * @summary Extract total amount from invoice image
+ */
+export const getExtractAmountUrl = () => {
+  return `/api/extract-amount`;
+};
+
+export const extractAmount = async (
+  extractAmountRequest: ExtractAmountRequest,
+  options?: RequestInit,
+): Promise<ExtractAmountResponse> => {
+  return customFetch<ExtractAmountResponse>(getExtractAmountUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(extractAmountRequest),
+  });
+};
+
+export const getExtractAmountMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof extractAmount>>,
+    TError,
+    { data: BodyType<ExtractAmountRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof extractAmount>>,
+  TError,
+  { data: BodyType<ExtractAmountRequest> },
+  TContext
+> => {
+  const mutationKey = ["extractAmount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof extractAmount>>,
+    { data: BodyType<ExtractAmountRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return extractAmount(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ExtractAmountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof extractAmount>>
+>;
+export type ExtractAmountMutationBody = BodyType<ExtractAmountRequest>;
+export type ExtractAmountMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Extract total amount from invoice image
+ */
+export const useExtractAmount = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof extractAmount>>,
+    TError,
+    { data: BodyType<ExtractAmountRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof extractAmount>>,
+  TError,
+  { data: BodyType<ExtractAmountRequest> },
+  TContext
+> => {
+  return useMutation(getExtractAmountMutationOptions(options));
 };

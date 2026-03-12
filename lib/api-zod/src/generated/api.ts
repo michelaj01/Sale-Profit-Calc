@@ -24,12 +24,17 @@ export const ListItemsResponseItem = zod.object({
   name: zod.string(),
   acquisitionCost: zod.number(),
   renovationCost: zod.number(),
+  costItems: zod.array(
+    zod.object({
+      label: zod.string(),
+      amount: zod.number(),
+    }),
+  ),
   totalCost: zod.number(),
   salePrice: zod.number(),
   profit: zod.number(),
   profitMargin: zod.number(),
   roi: zod.number(),
-  notes: zod.string().nullish(),
   createdAt: zod.date(),
 });
 export const ListItemsResponse = zod.array(ListItemsResponseItem);
@@ -41,8 +46,15 @@ export const CreateItemBody = zod.object({
   name: zod.string(),
   acquisitionCost: zod.number(),
   renovationCost: zod.number().optional(),
+  costItems: zod
+    .array(
+      zod.object({
+        label: zod.string(),
+        amount: zod.number(),
+      }),
+    )
+    .optional(),
   salePrice: zod.number(),
-  notes: zod.string().nullish(),
 });
 
 /**
@@ -56,8 +68,15 @@ export const UpdateItemBody = zod.object({
   name: zod.string(),
   acquisitionCost: zod.number(),
   renovationCost: zod.number().optional(),
+  costItems: zod
+    .array(
+      zod.object({
+        label: zod.string(),
+        amount: zod.number(),
+      }),
+    )
+    .optional(),
   salePrice: zod.number(),
-  notes: zod.string().nullish(),
 });
 
 export const UpdateItemResponse = zod.object({
@@ -65,12 +84,17 @@ export const UpdateItemResponse = zod.object({
   name: zod.string(),
   acquisitionCost: zod.number(),
   renovationCost: zod.number(),
+  costItems: zod.array(
+    zod.object({
+      label: zod.string(),
+      amount: zod.number(),
+    }),
+  ),
   totalCost: zod.number(),
   salePrice: zod.number(),
   profit: zod.number(),
   profitMargin: zod.number(),
   roi: zod.number(),
-  notes: zod.string().nullish(),
   createdAt: zod.date(),
 });
 
@@ -83,4 +107,18 @@ export const DeleteItemParams = zod.object({
 
 export const DeleteItemResponse = zod.object({
   success: zod.boolean(),
+});
+
+/**
+ * @summary Extract total amount from invoice image
+ */
+export const ExtractAmountBody = zod.object({
+  imageBase64: zod
+    .string()
+    .describe("Base64-encoded image of the invoice or quotation"),
+});
+
+export const ExtractAmountResponse = zod.object({
+  amount: zod.number().describe("Extracted total amount in AED"),
+  confidence: zod.string().describe("high, medium, or low"),
 });

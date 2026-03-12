@@ -9,17 +9,22 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface CostItem {
+  label: string;
+  amount: number;
+}
+
 export interface Item {
   id: number;
   name: string;
   acquisitionCost: number;
   renovationCost: number;
+  costItems: CostItem[];
   totalCost: number;
   salePrice: number;
   profit: number;
   profitMargin: number;
   roi: number;
-  notes?: string | null;
   createdAt: string;
 }
 
@@ -27,8 +32,20 @@ export interface CreateItemRequest {
   name: string;
   acquisitionCost: number;
   renovationCost?: number;
+  costItems?: CostItem[];
   salePrice: number;
-  notes?: string | null;
+}
+
+export interface ExtractAmountRequest {
+  /** Base64-encoded image of the invoice or quotation */
+  imageBase64: string;
+}
+
+export interface ExtractAmountResponse {
+  /** Extracted total amount in AED */
+  amount: number;
+  /** high, medium, or low */
+  confidence: string;
 }
 
 export interface ErrorResponse {

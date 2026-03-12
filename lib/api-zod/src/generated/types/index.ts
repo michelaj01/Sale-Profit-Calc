@@ -6,8 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./costItem";
 export * from "./createItemRequest";
 export * from "./deleteResponse";
 export * from "./errorResponse";
+export * from "./extractAmountRequest";
+export * from "./extractAmountResponse";
 export * from "./healthStatus";
 export * from "./item";

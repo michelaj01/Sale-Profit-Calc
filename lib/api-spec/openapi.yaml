@@ -116,6 +116,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /extract-amount:
+    post:
+      operationId: extractAmount
+      tags: [items]
+      summary: Extract total amount from invoice image
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractAmountRequest"
+      responses:
+        "200":
+          description: Extracted amount
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractAmountResponse"
+        "400":
+          description: Could not extract amount
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -125,6 +149,16 @@ components:
           type: string
       required:
         - status
+    CostItem:
+      type: object
+      properties:
+        label:
+          type: string
+        amount:
+          type: number
+      required:
+        - label
+        - amount
     Item:
       type: object
       properties:
@@ -136,6 +170,10 @@ components:
           type: number
         renovationCost:
           type: number
+        costItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/CostItem"
         totalCost:
           type: number
         salePrice:
@@ -146,9 +184,6 @@ components:
           type: number
         roi:
           type: number
-        notes:
-          type: string
-          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -157,6 +192,7 @@ components:
         - name
         - acquisitionCost
         - renovationCost
+        - costItems
         - totalCost
         - salePrice
         - profit
@@ -172,15 +208,36 @@ components:
           type: number
         renovationCost:
           type: number
+        costItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/CostItem"
         salePrice:
           type: number
-        notes:
-          type: string
-          nullable: true
       required:
         - name
         - acquisitionCost
         - salePrice
+    ExtractAmountRequest:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+          description: Base64-encoded image of the invoice or quotation
+      required:
+        - imageBase64
+    ExtractAmountResponse:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: Extracted total amount in AED
+        confidence:
+          type: string
+          description: high, medium, or low
+      required:
+        - amount
+        - confidence
     ErrorResponse:
       type: object
       properties:
