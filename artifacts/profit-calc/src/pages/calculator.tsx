@@ -586,40 +586,114 @@ export default function Calculator() {
         </div>
       )}
 
-      {/* ── Mortgage Return ── */}
+      {/* ── Cash Out of Pocket ── */}
       {hasCosts && (
-        <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Mortgage Return</p>
+        <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm flex flex-col gap-4">
+
+          {/* Header + down payment % */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Your Cash Out of Pocket</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Every dirham you actually spend</p>
+            </div>
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-muted-foreground">Down</span>
-              <div className="relative w-16">
-                <input type="number" inputMode="decimal" value={downPct} onChange={e => setDownPct(e.target.value)}
-                  min={1} max={100}
-                  className="w-full rounded-lg border border-input bg-background px-2 py-1 text-sm text-center text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" />
-              </div>
+              <input type="number" inputMode="decimal" value={downPct} onChange={e => setDownPct(e.target.value)}
+                min={1} max={100}
+                className="w-14 rounded-lg border border-input bg-background px-2 py-1 text-sm text-center text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" />
               <span className="text-xs text-muted-foreground">%</span>
             </div>
           </div>
-          <div className="flex flex-col gap-1.5 text-sm">
+
+          {/* Bank portion note */}
+          {propPrice > 0 && (
+            <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">Bank finances (mortgage)</span>
+              <span className="font-semibold text-foreground tabular-nums">{aed(loanAmount)}</span>
+            </div>
+          )}
+
+          {/* Itemized breakdown */}
+          <div className="flex flex-col gap-0">
+
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Your share — item by item</p>
+
+            {/* Down payment */}
+            <div className="flex justify-between items-center py-2 border-b border-border/60">
+              <div>
+                <p className="text-sm text-foreground font-medium">Down Payment</p>
+                <p className="text-[11px] text-muted-foreground">{Math.round(downFrac * 100)}% of property price</p>
+              </div>
+              <span className="text-sm font-semibold text-foreground tabular-nums">{aed(downPayment)}</span>
+            </div>
+
+            {/* Acquisition fees */}
             {[
-              { label: `Down payment (${Math.round(downFrac * 100)}%)`, val: downPayment },
-              { label: "Agency fee + DLD + trustee + reg", val: agencyFee + dldFee + trusteeFee + mortgageReg },
-              ...(manualAcq > 0 ? [{ label: "Other fees", val: manualAcq }] : []),
-              ...(renoTotal > 0 ? [{ label: "Renovation costs", val: renoTotal }] : []),
-            ].map(({ label, val }) => (
-              <div key={label} className="flex justify-between text-muted-foreground">
-                <span>{label}</span>
-                <span className="font-medium text-foreground tabular-nums">{aed(val)}</span>
+              { label: "Agency Fee",     sub: "2% + 5% VAT",      val: agencyFee,   show: propPrice > 0 },
+              { label: "DLD Fee",        sub: "4% of price",       val: dldFee,      show: propPrice > 0 },
+              { label: "Trustee Fee",    sub: "flat DLD fee",      val: trusteeFee,  show: propPrice > 0 },
+              { label: "Mortgage Reg.", sub: "0.25% of loan",     val: mortgageReg, show: propPrice > 0 },
+              { label: "Bank Processing",sub: "bank charge",       val: n(bankProcFee),  show: n(bankProcFee) > 0 },
+              { label: "Valuation Fee",  sub: "bank valuation",    val: n(valuationFee), show: n(valuationFee) > 0 },
+              { label: "NOC Fee",        sub: "developer fee",     val: n(nocFee),       show: n(nocFee) > 0 },
+              { label: "Service Fee Prov.", sub: "maintenance est.", val: n(serviceFee), show: n(serviceFee) > 0 },
+            ].filter(r => r.show).map(({ label, sub, val }) => (
+              <div key={label} className="flex justify-between items-center py-2 border-b border-border/60">
+                <div>
+                  <p className="text-sm text-foreground">{label}</p>
+                  <p className="text-[11px] text-muted-foreground">{sub}</p>
+                </div>
+                <span className="text-sm font-medium text-foreground tabular-nums">{aed(val)}</span>
               </div>
             ))}
-            <div className="flex justify-between border-t border-border pt-1.5 mt-0.5">
-              <span className="font-semibold text-foreground">Total out of pocket</span>
-              <span className="font-bold text-foreground tabular-nums">{aed(cashOut)}</span>
+
+            {/* Renovation items */}
+            {renoItems.filter(i => n(i.amount) > 0).map(item => (
+              <div key={item.id} className="flex justify-between items-center py-2 border-b border-border/60">
+                <div>
+                  <p className="text-sm text-foreground">{item.label || "Renovation item"}</p>
+                  <p className="text-[11px] text-muted-foreground">renovation cost</p>
+                </div>
+                <span className="text-sm font-medium text-foreground tabular-nums">{aed(n(item.amount))}</span>
+              </div>
+            ))}
+
+            {/* Total */}
+            <div className="flex justify-between items-center pt-3 mt-1">
+              <div>
+                <p className="text-base font-bold text-foreground">Total Out of Pocket</p>
+                <p className="text-[11px] text-muted-foreground">What you actually spend</p>
+              </div>
+              <span className="text-base font-bold text-foreground tabular-nums">{aed(cashOut)}</span>
             </div>
           </div>
 
-          {!hasBoth && <p className="text-xs text-muted-foreground mt-2 text-center">Enter a sale price above to see your returns</p>}
+          {/* Result */}
+          {hasBoth && cashOut > 0 ? (
+            <div className={`rounded-xl p-4 flex flex-col gap-3 ${profitable ? "bg-primary/8" : "bg-destructive/8"}`}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Return on Your Cash</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Profit</p>
+                  <p className={`text-2xl font-bold tabular-nums mt-0.5 ${profitable ? "text-primary" : "text-destructive"}`}>
+                    {aedSigned(profit)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">ROI on cash invested</p>
+                  <p className={`text-2xl font-bold tabular-nums mt-0.5 ${profitable ? "text-primary" : "text-destructive"}`}>
+                    {(mortgageRoiPct > 0 ? "+" : "") + pct(mortgageRoiPct)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/60 pt-2 mt-1">
+                <span>Cash invested: <span className="font-semibold text-foreground tabular-nums">{aed(cashOut)}</span></span>
+                <span>Sale: <span className="font-semibold text-foreground tabular-nums">{aed(sale)}</span></span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center">Enter a sale price above to see your return on cash</p>
+          )}
         </div>
       )}
 
