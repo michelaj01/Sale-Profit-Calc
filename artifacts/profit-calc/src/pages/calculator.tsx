@@ -249,27 +249,29 @@ export default function Calculator() {
               />
             </div>
           </div>
-          {propPrice > 0 && (
-            <div className="flex flex-col gap-1.5 bg-muted/40 rounded-lg px-3 py-2.5">
-              {[
-                { label: "Agency Fee", sub: "2%", val: agencyFee },
-                { label: "DLD Fee", sub: "4%", val: dldFee },
-                { label: "Mortgage Reg.", sub: "0.25% + 290", val: mortgageRegFee },
-              ].map(row => (
-                <div key={row.label} className="flex items-center justify-between">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-sm text-foreground">{row.label}</span>
-                    <span className="text-[11px] text-muted-foreground">{row.sub}</span>
-                  </div>
-                  <span className="text-sm font-medium text-foreground">AED {fmt(row.val)}</span>
+          <div className="flex flex-col gap-1.5 bg-muted/40 rounded-lg px-3 py-2.5">
+            {[
+              { label: "Agency Fee", sub: "2%", val: agencyFee },
+              { label: "DLD Fee", sub: "4%", val: dldFee },
+              { label: "Mortgage Reg.", sub: "0.25% + 290", val: mortgageRegFee },
+            ].map(row => (
+              <div key={row.label} className="flex items-center justify-between">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm text-foreground">{row.label}</span>
+                  <span className="text-[11px] text-muted-foreground">{row.sub}</span>
                 </div>
-              ))}
-              <div className="border-t border-border mt-1 pt-1.5 flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">Total Acquisition</span>
-                <span className="text-sm font-bold text-foreground">AED {fmt(acqTotal)}</span>
+                <span className={`text-sm font-medium ${propPrice > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                  AED {fmt(row.val)}
+                </span>
               </div>
+            ))}
+            <div className="border-t border-border mt-1 pt-1.5 flex items-center justify-between">
+              <span className="text-sm font-semibold text-foreground">Total Acquisition</span>
+              <span className={`text-sm font-bold ${propPrice > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                AED {fmt(acqTotal)}
+              </span>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="h-px bg-border" />
