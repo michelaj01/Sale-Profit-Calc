@@ -276,7 +276,9 @@ export default function Calculator() {
   const propPrice      = n(propertyPrice);
   const mouPriceN      = showAdvanced && mouPrice      ? n(mouPrice)      : propPrice;
   const bankValN       = showAdvanced && bankValuation ? n(bankValuation) : propPrice;
-  const gapPaymentCalc = showAdvanced && propPrice > 0 && mouPriceN > 0 ? Math.max(0, propPrice - mouPriceN) : 0;
+  // Gap = everything above what bank finances as asset value (actual − bank val)
+  // Down + Gap + Loan = actual price (no double count)
+  const gapPaymentCalc = showAdvanced && propPrice > 0 && bankValN > 0 ? Math.max(0, propPrice - bankValN) : 0;
   const gapPaymentN    = showAdvanced ? (gapPaymentOvr !== null ? n(gapPaymentOvr) : gapPaymentCalc) : 0;
 
   // Fee basis: agency on actual price, DLD on MOU, mortgage reg on bank val
@@ -294,8 +296,8 @@ export default function Calculator() {
   const mortgageReg = mortgageRegOvr !== null ? n(mortgageRegOvr) : mortgageRegCalc;
 
   const manualAcq   = n(bankProcFee) + n(valuationFee) + n(nocFee) + n(serviceFee);
-  // Use MOU price as property base in advanced mode (gap added separately = actual price, no double count)
-  const propertyBase = showAdvanced && mouPrice ? mouPriceN : propPrice;
+  // bankValN + gapPaymentN = propPrice (no double count); simple mode: propPrice + 0 = propPrice
+  const propertyBase = showAdvanced ? bankValN : propPrice;
   const acqTotal    = propertyBase + gapPaymentN + agencyFee + dldFee + trusteeFee + mortgageReg + manualAcq;
 
   // ── derived reno & totals ──────────────────────────────────────────────
@@ -433,7 +435,7 @@ export default function Calculator() {
               <div className="flex flex-col gap-0.5">
                 <EditableAutoRow
                   label="Gap Payment"
-                  sub="actual − MOU"
+                  sub="actual − bank val"
                   value={gapPaymentOvr !== null ? gapPaymentOvr : gapPaymentCalc.toFixed(2)}
                   onChange={v => setGapPaymentOvr(v)}
                   isEditing={!!editing["gapPayment"]}
@@ -445,7 +447,7 @@ export default function Calculator() {
                   onReset={() => setGapPaymentOvr(null)}
                   isOverridden={gapPaymentOvr !== null}
                 />
-                <p className="text-[11px] text-muted-foreground ml-[8.5rem]">Extra cash paid above MOU (added to cost)</p>
+                <p className="text-[11px] text-muted-foreground ml-[8.5rem]">Cash above bank valuation paid to seller</p>
               </div>
             </div>
           )}
@@ -730,7 +732,7 @@ export default function Calculator() {
               <div>
                 <p className="text-sm text-foreground font-medium">Down Payment</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {Math.round(downFrac * 100)}% of {showAdvanced && mouPrice ? "MOU price" : "property price"}
+                  {Math.round(downFrac * 100)}% of {showAdvanced && bankValuation ? "bank valuation" : "property price"}
                 </p>
               </div>
               <span className="text-sm font-semibold text-foreground tabular-nums">{aed(downPayment)}</span>
@@ -741,7 +743,7 @@ export default function Calculator() {
               <div className="flex justify-between items-center py-2 border-b border-border/60">
                 <div>
                   <p className="text-sm text-foreground font-medium">Gap Payment</p>
-                  <p className="text-[11px] text-muted-foreground">extra cash to seller (actual − MOU)</p>
+                  <p className="text-[11px] text-muted-foreground">extra cash to seller (actual − bank val)</p>
                 </div>
                 <span className="text-sm font-semibold text-foreground tabular-nums">{aed(gapPaymentN)}</span>
               </div>
